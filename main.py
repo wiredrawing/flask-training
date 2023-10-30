@@ -1,6 +1,12 @@
+# from datetime import time
 import time
+from flask import Flask, request, make_response, render_template, jsonify
+from sqlalchemy.orm import Session
 
-from flask import Flask, request, make_response, render_template, jsonify;
+from lib.setting import session, engine
+from models.Room import Room
+from models.User import User
+from models.Message import Message
 
 app = Flask(__name__, template_folder="templates")
 
@@ -8,7 +14,16 @@ app = Flask(__name__, template_folder="templates")
 # TOPページ
 @app.route('/')
 def hello():
-    return "Hello World!"
+    # DB接続のテスト
+    messages = session.query(Message.message).all()
+    for message in messages:
+        print(message)
+
+    params = {
+        "template_title": "flask test",
+        "template_message": "ここにテンプレートに渡す値を設定する"
+    }
+    return render_template("index.html", **params)
 
 
 @app.route("/test/get", methods=['GET'])
@@ -45,22 +60,69 @@ def api_users():
     return response
 
 
+@app.route("/add/somedata/to/db", methods=['GET'])
+def add_somedata_to_db():
+    # 何かしらユーザーデータを登録する
+    user = User();
+    user.username = "testuser"
+    user.gender = 1;
+    session.add(user)
+    session.commit()
+
+    def inner():
+        # 新規データを登録後,全レコードを取得する
+        users = session.query(User).all()
+        for user in users:
+            yield f"data: {user.username}\n\n"
+            time.sleep(1)
+        pass
+
+    inner_variable = inner
+
+    # トランザクションを使用した場合
+    try:
+        session.begin()
+        transaction_user = User()
+        transaction_user.username = "transaction_user"
+        transaction_user.gender = 2
+        session.add(transaction_user)
+        session.commit()
+    except Exception as e:
+        print(e)
+        session.rollback()
+    # server sent eventでレコードを垂れ流してみる
+    response = make_response(inner_variable())
+    response.headers["Content-Type"] = "text/event-stream; charset=UTF-8"
+    return response
+
+
+
+# scoped_sessionを使わない場合
+@app.route("/just/in/time/add", methods=['GET'])
+def just_in_time_add():
+
+    session = Session(engine)
+    try:
+        session.begin();
+        room = Room();
+        room.room_name = "ここは40代男性のみのルームです";
+        room.description = "40代男性のみのルームです";
+        session.add(room)
+        session.commit();
+    except Exception as e:
+        session.rollback();
+
+    rooms = session.query(Room).all()
+    def inner():
+        for room in rooms:
+            yield f"data: {room.room_name}\n\n"
+            time.sleep(1)
+        pass
+
+    response = make_response(inner());
+    response.headers["Content-Type"] = "text/event-stream; charset=UTF-8"
+    return response
+
+
 if __name__ == "__main__":
     app.run(debug=True)
-
-# # これはサンプルの Python スクリプトです。
-#
-# # Shift+F10 を押して実行するか、ご自身のコードに置き換えてください。
-# # Shift を2回押す を押すと、クラス/ファイル/ツールウィンドウ/アクション/設定を検索します。
-#
-#
-# def print_hi(name):
-#     # スクリプトをデバッグするには以下のコード行でブレークポイントを使用してください。
-#     print(f'Hi, {name}')  # Ctrl+F8を押すとブレークポイントを切り替えます。
-#
-#
-# # ガター内の緑色のボタンを押すとスクリプトを実行します。
-# if __name__ == '__main__':
-#     print_hi('PyCharm')
-#
-# # PyCharm のヘルプは https://www.jetbrains.com/help/pycharm/ を参照してください
