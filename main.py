@@ -11,6 +11,19 @@ from models.Message import Message
 app = Flask(__name__, template_folder="templates")
 
 
+@app.route("/loop")
+def loop():
+    def inner():
+        # 無限ループでServer Sent Eventを実行する
+        while True:
+            yield "これは無限ループのSSEエンドポイントです{}{}".format("\n", "\n")
+            time.sleep(1)
+
+    response = make_response(inner())
+    response.headers["Content-Type"] = "text/event-stream; charset=UTF-8"
+    return response
+
+
 # TOPページ
 @app.route('/')
 def hello():
@@ -96,23 +109,22 @@ def add_somedata_to_db():
     return response
 
 
-
 # scoped_sessionを使わない場合
 @app.route("/just/in/time/add", methods=['GET'])
 def just_in_time_add():
-
     session = Session(engine)
     try:
         session.begin();
         room = Room();
-        room.room_name = "ここは40代男性のみのルームです";
-        room.description = "40代男性のみのルームです";
+        room.room_name = "★ここは40代男性のみのルームです";
+        room.description = "★40代男性のみのルームです";
         session.add(room)
         session.commit();
     except Exception as e:
         session.rollback();
 
     rooms = session.query(Room).all()
+
     def inner():
         for room in rooms:
             yield f"data: {room.room_name}\n\n"
@@ -122,6 +134,24 @@ def just_in_time_add():
     response = make_response(inner());
     response.headers["Content-Type"] = "text/event-stream; charset=UTF-8"
     return response
+
+
+@app.route("/login", methods=['GET'])
+def login():
+    response = make_response(render_template("login/login.html"))
+    return response
+
+
+@app.route("/login/authorize", methods=['POST'])
+def authorize():
+    # formから入力されたアカウント情報を取得
+    request_data = request.form
+    body = request_data.to_dict()
+    print(body)
+    user = session.query(User).filter(User.email == body["email"]) \
+        .filter(User.password == body["password"]).first()
+    print(user)
+    return True;
 
 
 if __name__ == "__main__":
