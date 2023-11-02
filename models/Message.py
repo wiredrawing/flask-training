@@ -6,7 +6,7 @@ import sys
 # for value in sys.path:
 #     print(value)
 
-from sqlalchemy import Column, Integer, Text
+from sqlalchemy import Column, Integer, Text, ForeignKey
 from lib.setting import engine, base, session
 
 
@@ -24,7 +24,8 @@ class Message(base):
 
     id = Column(Integer, primary_key=True, autoincrement=True, comment="メッセージID")
     message = Column(Text(), nullable=False, comment="メッセージ")
-    # user_id = Column(Integer, ForeignKey('users.id'), nullable=False, comment="ユーザーID")
+    room_id = Column(Integer, ForeignKey('rooms.id'), nullable=False, comment="ルームID")
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False, comment="ユーザーID")
 
 
 if __name__ == "__main__":

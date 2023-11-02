@@ -13,10 +13,12 @@ class Participant(base):
     }
 
     id = Column(Integer, primary_key=True, autoincrement=True, comment="参加者ID")
-    room_id = Column(Integer, nullable=False, comment="ルームID")
+    room_id = Column(Integer, ForeignKey("rooms.id"), nullable=False, comment="ルームID")
     # users.idを外部キーに設定
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, comment="ユーザーID")
-    user = relationship("User", back_populates="participants")
+
+    # belongs_toの場合 => back_populates で関連付けると動作する
+    # user = relationship("User", back_populates="participants")
 
 
 if __name__ == "__main__":

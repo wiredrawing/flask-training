@@ -4,6 +4,7 @@ from flask import Flask, request, make_response, render_template, jsonify
 from sqlalchemy.orm import Session
 
 from lib.setting import session, engine
+from models.Participant import Participant
 from models.Room import Room
 from models.User import User
 from models.Message import Message
@@ -138,6 +139,29 @@ def just_in_time_add():
 
 @app.route("/login", methods=['GET'])
 def login():
+    print("チャットルームに対する参加者を取得する")
+    participants = session.query(Participant).filter(Participant.id == 1).first()
+    if participants:
+        print("participantsテーブルに該当レコードが存在します")
+        print(participants);
+        print(participants.user.id)
+        print(participants.user.email)
+        print(participants.user.password)
+        print(participants.user.username)
+        pass
+    else:
+        print("participantsテーブルに該当レコードが存在しません")
+        pass
+
+    print("Userモデルからみた関係");
+    user = session.query(User).filter(User.id == 2).first()
+    if user:
+        print(user)
+        print(user.participants)
+        for p in user.participants:
+            print(participants.id)
+            print(participants.room_id)
+            print(participants.user_id)
     response = make_response(render_template("login/login.html"))
     return response
 
@@ -148,10 +172,18 @@ def authorize():
     request_data = request.form
     body = request_data.to_dict()
     print(body)
+    # テストアプリケーションのため平文で検証
     user = session.query(User).filter(User.email == body["email"]) \
         .filter(User.password == body["password"]).first()
-    print(user)
-    return True;
+    if user != None:
+        print(user.participants)
+        for participant in user.participants:
+            print(participant.room_id)
+            print(participant.user_id)
+            print(participant.id);
+        # ログイン成功
+        return "ログインしました"
+    return "ログインに失敗しました"
 
 
 if __name__ == "__main__":
