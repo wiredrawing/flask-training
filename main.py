@@ -1,6 +1,6 @@
 # from datetime import time
 import time
-from flask import Flask, request, make_response, render_template, jsonify
+from flask import Flask, request, make_response, render_template, jsonify, Blueprint
 from sqlalchemy.orm import Session
 
 from lib.setting import session, engine
@@ -9,7 +9,11 @@ from models.Room import Room
 from models.User import User
 from models.Message import Message
 
+# 自作外部ファイルルーティングをimport
+from routes import register_user
+
 app = Flask(__name__, template_folder="templates")
+app.register_blueprint(register_user.app)
 
 
 @app.route("/loop")
@@ -184,6 +188,33 @@ def authorize():
         # ログイン成功
         return "ログインしました"
     return "ログインに失敗しました"
+
+
+@app.route("/add/message", methods=['GET'])
+def add_message_form():
+    return render_template("message/add_form.html")
+
+
+@app.route("/add/message", methods=['POST'])
+def add_message():
+    try:
+        # フォームからメッセージを取得
+        request_data = request.form
+        body = request_data.to_dict()
+        print(body)
+        # メッセージを登録
+        message = Message()
+        message.message = body["message"]
+        message.room_id = 1
+        message.user_id = 1
+        session.add(message)
+        session.commit()
+    except Exception as e:
+        session.rollback();
+        print(e);
+        return "メッセージの送信に失敗しました"
+
+    return "メッセージを登録しました"
 
 
 if __name__ == "__main__":

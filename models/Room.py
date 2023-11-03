@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, Text
+from sqlalchemy.orm import relationship
 
 from lib.setting import session, base, engine
 
@@ -13,6 +14,8 @@ class Room(base):
     id = Column(Integer, primary_key=True, autoincrement=True, comment="ルームID")
     room_name = Column(Text(), nullable=False, comment="ルーム名")
     description = Column(Text(), nullable=False, comment="ルームの説明")
+
+    messages = relationship("Message", backref="room")
 
 
 if __name__ == "__main__":

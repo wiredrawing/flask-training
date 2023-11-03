@@ -34,6 +34,5 @@ if __name__ == "__main__":
     messages = session.query(Message.message).all()
     print(messages)
     for message in messages:
-
         print(message.message)
     pass
