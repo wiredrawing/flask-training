@@ -1,5 +1,7 @@
 # from datetime import time
 import time
+
+import bcrypt
 from flask import Flask, request, make_response, render_template, jsonify, Blueprint
 from sqlalchemy.orm import Session
 
@@ -175,19 +177,30 @@ def authorize():
     # formから入力されたアカウント情報を取得
     request_data = request.form
     body = request_data.to_dict()
-    print(body)
-    # テストアプリケーションのため平文で検証
-    user = session.query(User).filter(User.email == body["email"]) \
-        .filter(User.password == body["password"]).first()
-    if user != None:
-        print(user.participants)
-        for participant in user.participants:
-            print(participant.room_id)
-            print(participant.user_id)
-            print(participant.id);
-        # ログイン成功
-        return "ログインしました"
-    return "ログインに失敗しました"
+    user = session.query(User).filter(User.email == body["email"]).first()
+
+    # emailが存在する場合,パスワードを検証する
+    if user is not None:
+        # バイト列として取得
+        hashed_password = user.password.encode("utf-8")
+        if bcrypt.checkpw(body["password"].encode("utf-8"), hashed_password):
+            return "パスワードが一致しました"
+
+    return "パスワードが一致しません"
+
+
+    # # テストアプリケーションのため平文で検証
+    # user = session.query(User).filter(User.email == body["email"]) \
+    #     .filter(User.password == body["password"]).first()
+    # if user != None:
+    #     print(user.participants)
+    #     for participant in user.participants:
+    #         print(participant.room_id)
+    #         print(participant.user_id)
+    #         print(participant.id);
+    #     # ログイン成功
+    #     return "ログインしました"
+    # return "ログインに失敗しました"
 
 
 @app.route("/add/message", methods=['GET'])
