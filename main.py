@@ -1,8 +1,9 @@
 # from datetime import time
 import time
+from datetime import timedelta
 
 import bcrypt
-from flask import Flask, request, make_response, render_template, jsonify, Blueprint
+from flask import Flask, request, make_response, render_template, jsonify, Blueprint, session as http_session
 from sqlalchemy.orm import Session
 
 from lib.setting import session, engine
@@ -16,6 +17,8 @@ from routes import register_user
 
 app = Flask(__name__, template_folder="templates")
 app.register_blueprint(register_user.app)
+app.secret_key = "random seckey for flask"
+app.permanent_session_lifetime = timedelta(days=365)
 
 
 @app.route("/loop")
@@ -184,42 +187,42 @@ def authorize():
         # バイト列として取得
         hashed_password = user.password.encode("utf-8")
         if bcrypt.checkpw(body["password"].encode("utf-8"), hashed_password):
+            # パスワードが一致した場合セッションにユーザー情報を格納する
+            http_session.permanent = True
+            http_session["user_id"] = user.id
             return "パスワードが一致しました"
 
     return "パスワードが一致しません"
 
 
-    # # テストアプリケーションのため平文で検証
-    # user = session.query(User).filter(User.email == body["email"]) \
-    #     .filter(User.password == body["password"]).first()
-    # if user != None:
-    #     print(user.participants)
-    #     for participant in user.participants:
-    #         print(participant.room_id)
-    #         print(participant.user_id)
-    #         print(participant.id);
-    #     # ログイン成功
-    #     return "ログインしました"
-    # return "ログインに失敗しました"
-
-
-@app.route("/add/message", methods=['GET'])
+@app.route("/message/add", methods=['GET'])
 def add_message_form():
+    user_id = http_session.get("user_id");
+    if user_id is None:
+        return "ログインしてください"
+
     return render_template("message/add_form.html")
 
 
-@app.route("/add/message", methods=['POST'])
+@app.route("/message/add", methods=['POST'])
 def add_message():
+    user_id = http_session.get("user_id");
+    if user_id == None:
+        return "ログインしてください"
     try:
         # フォームからメッセージを取得
         request_data = request.form
         body = request_data.to_dict()
+
+        # メッセージは必須とする
+        if len(body["message"]) == 0:
+            return "メッセージを入力してください"
         print(body)
         # メッセージを登録
         message = Message()
         message.message = body["message"]
         message.room_id = 1
-        message.user_id = 1
+        message.user_id = user_id
         session.add(message)
         session.commit()
     except Exception as e:
@@ -228,6 +231,60 @@ def add_message():
         return "メッセージの送信に失敗しました"
 
     return "メッセージを登録しました"
+
+
+# 指定された引数のルームIDに紐づくメッセージを取得する
+@app.route("/room/<int:room_id>/", methods=['GET'])
+def room(room_id):
+    print("room_id = {}".format(room_id))
+    # 選択したチャットルーム情報を取得
+    room = session.query(Room).filter(Room.id == room_id).first()
+
+    # 選択したチャットルームに紐づく全メッセージを最新順に取得
+    messages = session.query(Message).filter(Message.room_id == room_id).order_by(Message.id.desc()).all()
+    for message in messages:
+        print(message.message)
+        print(message.room.room_name);
+
+    return render_template("room/room.html", room=room, messages=messages)
+
+
+@app.route("/room/", methods=['GET'])
+def rooms():
+    """
+    現在,DB上に登録されているチャットルーム一覧を取得する
+    :return:
+    """
+    rooms: object = session.query(Room).all()
+    response = make_response(render_template("room/list.html", rooms=rooms))
+    return response
+
+
+@app.route("/room/add/", methods=['GET'])
+def room_form():
+    """
+    チャットルームを追加する
+    :return:
+    """
+    return render_template("room/add_room.html")
+
+
+@app.route("/room/add/", methods=['POST'])
+def add_post():
+    request_data = request.form
+    if len(request_data["room_name"]) == 0 and len(request_data["description"]) == 0:
+        return "Room名および概要説明は必須項目です"
+    try:
+        room = Room();
+        room.room_name = request_data["room_name"]
+        room.description = request_data["description"]
+        session.add(room)
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        print(e)
+
+    return "ルームを追加しました"
 
 
 if __name__ == "__main__":

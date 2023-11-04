@@ -1,0 +1,9 @@
+
+
+<h2>Roomに投稿したメッセージ一覧</h2>
+
+{% for message in messages %}
+  <p>ID: {{message.id}}</p>
+  <p>メッセージ: {{message.message}}</p>
+  <p>発言者: {{message.user.username}}</p>
+{% endfor %}

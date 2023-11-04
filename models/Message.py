@@ -1,5 +1,3 @@
-import os
-import sys
 
 # sys.path.append('C:\\Users\\a-sen\\works\\flask')
 #
@@ -7,6 +5,8 @@ import sys
 #     print(value)
 
 from sqlalchemy import Column, Integer, Text, ForeignKey
+from sqlalchemy.orm import relationship
+
 from lib.setting import engine, base, session
 
 
