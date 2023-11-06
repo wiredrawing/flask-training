@@ -1,8 +1,8 @@
 # from datetime import time
+import asyncio
 import time
 from datetime import timedelta
 
-import bcrypt
 from flask import Flask, request, make_response, render_template, jsonify, Blueprint, session as http_session
 from sqlalchemy.orm import Session
 
@@ -14,9 +14,20 @@ from models.Message import Message
 
 # 自作外部ファイルルーティングをimport
 from routes import register_user
+from routes import login_user
+from routes import dashboard
+from routes import room
 
-app = Flask(__name__, template_folder="templates")
+from app import app
+
+# app = Flask(__name__, template_folder="templates")
+
+# 外部ファイルに指定したルーティング処理を登録する
 app.register_blueprint(register_user.app)
+app.register_blueprint(login_user.app)
+app.register_blueprint(dashboard.app)
+app.register_blueprint(room.app)
+
 app.secret_key = "random seckey for flask"
 app.permanent_session_lifetime = timedelta(days=365)
 
@@ -146,53 +157,53 @@ def just_in_time_add():
     return response
 
 
-@app.route("/login", methods=['GET'])
-def login():
-    print("チャットルームに対する参加者を取得する")
-    participants = session.query(Participant).filter(Participant.id == 1).first()
-    if participants:
-        print("participantsテーブルに該当レコードが存在します")
-        print(participants);
-        print(participants.user.id)
-        print(participants.user.email)
-        print(participants.user.password)
-        print(participants.user.username)
-        pass
-    else:
-        print("participantsテーブルに該当レコードが存在しません")
-        pass
-
-    print("Userモデルからみた関係");
-    user = session.query(User).filter(User.id == 2).first()
-    if user:
-        print(user)
-        print(user.participants)
-        for p in user.participants:
-            print(participants.id)
-            print(participants.room_id)
-            print(participants.user_id)
-    response = make_response(render_template("login/login.html"))
-    return response
-
-
-@app.route("/login/authorize", methods=['POST'])
-def authorize():
-    # formから入力されたアカウント情報を取得
-    request_data = request.form
-    body = request_data.to_dict()
-    user = session.query(User).filter(User.email == body["email"]).first()
-
-    # emailが存在する場合,パスワードを検証する
-    if user is not None:
-        # バイト列として取得
-        hashed_password = user.password.encode("utf-8")
-        if bcrypt.checkpw(body["password"].encode("utf-8"), hashed_password):
-            # パスワードが一致した場合セッションにユーザー情報を格納する
-            http_session.permanent = True
-            http_session["user_id"] = user.id
-            return "パスワードが一致しました"
-
-    return "パスワードが一致しません"
+# @app.route("/login", methods=['GET'])
+# def login():
+#     print("チャットルームに対する参加者を取得する")
+#     participants = session.query(Participant).filter(Participant.id == 1).first()
+#     if participants:
+#         print("participantsテーブルに該当レコードが存在します")
+#         print(participants);
+#         print(participants.user.id)
+#         print(participants.user.email)
+#         print(participants.user.password)
+#         print(participants.user.username)
+#         pass
+#     else:
+#         print("participantsテーブルに該当レコードが存在しません")
+#         pass
+# 
+#     print("Userモデルからみた関係");
+#     user = session.query(User).filter(User.id == 2).first()
+#     if user:
+#         print(user)
+#         print(user.participants)
+#         for p in user.participants:
+#             print(participants.id)
+#             print(participants.room_id)
+#             print(participants.user_id)
+#     response = make_response(render_template("login/login.html"))
+#     return response
+# 
+# 
+# @app.route("/login/authorize", methods=['POST'])
+# def authorize():
+#     # formから入力されたアカウント情報を取得
+#     request_data = request.form
+#     body = request_data.to_dict()
+#     user = session.query(User).filter(User.email == body["email"]).first()
+# 
+#     # emailが存在する場合,パスワードを検証する
+#     if user is not None:
+#         # バイト列として取得
+#         hashed_password = user.password.encode("utf-8")
+#         if bcrypt.checkpw(body["password"].encode("utf-8"), hashed_password):
+#             # パスワードが一致した場合セッションにユーザー情報を格納する
+#             http_session.permanent = True
+#             http_session["user_id"] = user.id
+#             return "パスワードが一致しました"
+# 
+#     return "パスワードが一致しません"
 
 
 @app.route("/message/add", methods=['GET'])
@@ -207,7 +218,7 @@ def add_message_form():
 @app.route("/message/add", methods=['POST'])
 def add_message():
     user_id = http_session.get("user_id");
-    if user_id == None:
+    if user_id is None:
         return "ログインしてください"
     try:
         # フォームからメッセージを取得
@@ -233,31 +244,31 @@ def add_message():
     return "メッセージを登録しました"
 
 
-# 指定された引数のルームIDに紐づくメッセージを取得する
-@app.route("/room/<int:room_id>/", methods=['GET'])
-def room(room_id):
-    print("room_id = {}".format(room_id))
-    # 選択したチャットルーム情報を取得
-    room = session.query(Room).filter(Room.id == room_id).first()
-
-    # 選択したチャットルームに紐づく全メッセージを最新順に取得
-    messages = session.query(Message).filter(Message.room_id == room_id).order_by(Message.id.desc()).all()
-    for message in messages:
-        print(message.message)
-        print(message.room.room_name);
-
-    return render_template("room/room.html", room=room, messages=messages)
-
-
-@app.route("/room/", methods=['GET'])
-def rooms():
-    """
-    現在,DB上に登録されているチャットルーム一覧を取得する
-    :return:
-    """
-    rooms: object = session.query(Room).all()
-    response = make_response(render_template("room/list.html", rooms=rooms))
-    return response
+# # 指定された引数のルームIDに紐づくメッセージを取得する
+# @app.route("/room/<int:room_id>/", methods=['GET'])
+# def room(room_id):
+#     print("room_id = {}".format(room_id))
+#     # 選択したチャットルーム情報を取得
+#     room = session.query(Room).filter(Room.id == room_id).first()
+#
+#     # 選択したチャットルームに紐づく全メッセージを最新順に取得
+#     messages = session.query(Message).filter(Message.room_id == room_id).order_by(Message.id.desc()).all()
+#     for message in messages:
+#         print(message.message)
+#         print(message.room.room_name);
+#
+#     return render_template("room/room.html", room=room, messages=messages)
+#
+#
+# @app.route("/room/", methods=['GET'])
+# def rooms():
+#     """
+#     現在,DB上に登録されているチャットルーム一覧を取得する
+#     :return:
+#     """
+#     rooms: object = session.query(Room).all()
+#     response = make_response(render_template("room/list.html", rooms=rooms))
+#     return response
 
 
 @app.route("/room/add/", methods=['GET'])

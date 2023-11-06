@@ -1,11 +1,20 @@
+from flask_login import UserMixin
 from sqlalchemy import Column, Integer, Text
 from sqlalchemy.orm import relationship
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from lib.setting import engine, base, session
 from models.Participant import Participant
+from app import login
 
 
-class User(base):
+@login.user_loader
+def load_user(id):
+    return session.query(User).get(int(id))
+
+
+# flask-login用に多重継承
+class User(UserMixin, base):
     __tablename__ = 'users'
     __table_args__ = {
         'mysql_collate': 'utf8_general_ci',
@@ -34,6 +43,15 @@ class User(base):
 
     # 対象レコードのユーザーが発言したメッセージ一覧を取得する
     messages = relationship("Message", backref="user")
+
+
+# Do hash password.
+def set_password(self, password):
+    self.password_hash = generate_password_hash(password)
+
+
+def check_password(self, password):
+    return check_password_hash(self.password_hash, password)
 
 
 if __name__ == "__main__":

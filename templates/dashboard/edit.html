@@ -1,0 +1,13 @@
+ログインユーザー情報の更新
+
+
+<form action="/dashboard/update" method="post">
+  <input type="hidden" name="id" value="{{user.id}}">
+  <p>メールアドレス</p>
+  <input type="text" name="email" value="{{user.email}}">
+
+  <p>ユーザー名</p>
+  <input type="text" name="username" value="{{user.username}}">
+
+  <input type="submit" value="更新">
+</form>
