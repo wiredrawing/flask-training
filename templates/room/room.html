@@ -7,3 +7,12 @@
   <p>メッセージ: {{message.message}}</p>
   <p>発言者: {{message.user.username}}</p>
 {% endfor %}
+
+
+<form action="/room/message/create/{{room.id}}" method="post">
+  <input type="hidden" name="user_id" value="{{user.id}}">
+  <p>メッセージ</p>
+  <input type="text" name="message">
+  <input type="submit" value="投稿">
+
+</form>
