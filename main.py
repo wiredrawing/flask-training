@@ -3,7 +3,8 @@ import asyncio
 import time
 from datetime import timedelta
 
-from flask import Flask, request, make_response, render_template, jsonify, Blueprint, session as http_session
+from flask import Flask, request, make_response, render_template, jsonify, Blueprint, session as http_session, redirect
+from flask_login import current_user, LoginManager, decode_cookie, encode_cookie
 from sqlalchemy.orm import Session
 
 from lib.setting import session, engine
@@ -26,10 +27,36 @@ from app import app
 app.register_blueprint(register_user.app)
 app.register_blueprint(login_user.app)
 app.register_blueprint(dashboard.app)
+
 app.register_blueprint(room.app)
 
 app.secret_key = "random seckey for flask"
 app.permanent_session_lifetime = timedelta(days=365)
+
+
+class Middleware:
+    def __init__(self, app):
+        self.app = app
+
+    def __call__(self, environ, start_response):
+        # print(encode_cookie("あああ", app.secret_key))
+        # print(decode_cookie(encode_cookie("あああ", app.secret_key), app.secret_key))
+        # print(dir(environ))
+        # print(environ.keys())
+        # print(environ["HTTP_COOKIE"])
+        # print(decode_cookie(environ["HTTP_COOKIE"], "random seckey for flask"))
+        # print("------------------------")
+        # print(current_user)
+        # print(start_response)
+        #
+        # for key, value in start_response:
+        #     print(value);
+        #     print(key)
+        # print("------------------------")
+        return self.app(environ, start_response)
+
+
+app.wsgi_app = Middleware(app.wsgi_app)
 
 
 @app.route("/loop")
@@ -296,6 +323,35 @@ def add_post():
         print(e)
 
     return "ルームを追加しました"
+
+
+# 指定したルーティング以外は認証を必須とする
+# もし非認証だった場合はログインページにリダイレクトする
+@app.before_request
+def hook():
+    # ログインフォーム以外はログイン済みであることを確認する
+    if request.path == "/login" or request.path == "/login/":
+        # ログインフォームは非認証状態でもアクセス可能
+        pass
+    else :
+        if current_user.is_authenticated is not True:
+            return redirect("/login")
+        else:
+            # 認証済みであればOK
+            print("----------------------------------")
+            print(request.path)
+            print(request.url)
+            print("すでにログイン済みです")
+            print("=============================")
+            print(dir(request))
+            print('endpoint: %s, url: %s, path: %s' % (
+                request.endpoint,
+                request.url,
+                request.path))
+            print(request.environ)
+            print(current_user.id)
+            print("=============================")
+            print(request)
 
 
 if __name__ == "__main__":

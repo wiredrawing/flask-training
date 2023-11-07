@@ -1,5 +1,5 @@
 from flask import Flask, Blueprint, render_template, redirect, request
-from flask_login import current_user
+from flask_login import current_user, login_required
 
 from lib.setting import session
 from models.Message import Message
@@ -10,35 +10,51 @@ import logging
 app = Blueprint('room', __name__, url_prefix='/room')
 
 
-try:
-    # 全体のログ設定
-    # ファイルに書き出す。ログが100KB溜まったらバックアップにして新しいファイルを作る。
-    root_logger = getLogger()
-    root_logger.setLevel(logging.ERROR)
-    rotating_handler = handlers.RotatingFileHandler(
-        # ※注意)プログラム実行ディレクトリのlogs/app.logに出力
-        r'./logs/app.log',
-        mode="a",
-        maxBytes=100 * 1024,
-        backupCount=3,
-        encoding="utf-8"
-    )
-    format = logging.Formatter('%(asctime)s : %(levelname)s : %(filename)s - %(message)s')
-    rotating_handler.setFormatter(format)
-    root_logger.addHandler(rotating_handler)
-except Exception as e:
-    print(e);
+def get_app_logger():
+    try:
+        # 全体のログ設定
+        # ファイルに書き出す。ログが100KB溜まったらバックアップにして新しいファイルを作る。
+        app_logger = getLogger()
+        app_logger.setLevel(logging.ERROR)
+        rotating_handler = handlers.RotatingFileHandler(
+            # ※注意)プログラム実行ディレクトリのlogs/app.logに出力
+            r'./logs/app.log',
+            mode="a",
+            maxBytes=100 * 1024,
+            backupCount=3,
+            encoding="utf-8"
+        )
+        app_format = logging.Formatter('%(asctime)s : %(levelname)s : %(filename)s - %(message)s')
+        rotating_handler.setFormatter(app_format)
+        app_logger.addHandler(rotating_handler)
+        return app_logger
+    except Exception as e:
+        print(type(e))
+        print(e)
+        return None
+
+#
+# with app.app_context_processor() as c:
+#     def without_login():
+#         logger = get_app_logger()
+#         logger.info("ログインしていません")
+
 
 
 @app.route("/", methods=['GET'])
+# @login_required(without_login)
 def index():
-    logger = getLogger(__name__)
-    logger.debug("あああああああああああああ");
-    # ログインしていない場合はログインページにリダイレクト
-    # 要ログイン
-    if current_user.is_authenticated is not True:
-        return redirect("/login")
-    # end
+    """ログイン状態を必須とする"""
+    logger = get_app_logger()
+    # logger = getLogger(__name__)
+    logger.debug("ロギング処理を関数化して対応");
+    logger.error("ロギング処理を関数化して対応")
+    print(logger)
+    # # ログインしていない場合はログインページにリダイレクト
+    # # 要ログイン
+    # if current_user.is_authenticated is not True:
+    #     return redirect("/login")
+    # # end
     print(current_user.password)
     # 現在稼働中のチャットルーム一覧を表示
     rooms = session.query(Room).all()

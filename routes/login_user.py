@@ -12,11 +12,10 @@ app = Blueprint('login_user', __name__, url_prefix='/login')
 @app.route("/", methods=['GET'])
 def login():
     try:
-
-        print("current_user.is_authenticated ====>");
-        print(current_user.is_authenticated)
-        if current_user.is_authenticated:
-            return redirect("/dashboard")
+        # print("current_user.is_authenticated ====>");
+        # print(current_user.is_authenticated)
+        # if current_user.is_authenticated:
+        #     return redirect("/dashboard")
 
         print("まだログインしていません");
         # print(current_user)
