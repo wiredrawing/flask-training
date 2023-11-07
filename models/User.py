@@ -15,14 +15,37 @@ def load_user(id):
 
 # flask-login用に多重継承
 class User(UserMixin, base):
+    """
+    モデルのマイグレーション方法
+    (1).
+    最新バージョンへのマイグレーション
+    alembic upgrade head
+    (2).
+    マイグレーションを1つ戻す
+    alembic downgrade -1
+    (3).
+    マイグレーションを1つ進める
+    alembic upgrade +1
+    (4).
+    マイグレーションを指定したバージョンまで戻す
+    alembic downgrade 123456789
+    (5).
+    マイグレーションを指定したバージョンまで進める
+    alembic upgrade 123456789
+    (6).
+    マイグレーションを最初まで戻す
+    alembic downgrade base
+    """
     __tablename__ = 'users'
     __table_args__ = {
         'mysql_collate': 'utf8_general_ci',
         "comment": "ユーザーモデル",
     }
 
+
     id = Column(Integer, primary_key=True, autoincrement=True, comment="ユーザーID")
-    email = Column(Text(), nullable=False, comment="メールアドレス")
+    # emailはユニークとする
+    email = Column(Text(), nullable=False, comment="メールアドレス", unique=True)
     password = Column(Text(), nullable=False, comment="パスワード");
     username = Column(Text(), nullable=False, comment="ユーザー名")
     gender = Column(Integer, nullable=False, comment="性別")

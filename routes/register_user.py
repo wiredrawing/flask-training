@@ -1,5 +1,5 @@
 import bcrypt
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, redirect
 
 from lib.setting import session
 from models.User import User
@@ -32,7 +32,10 @@ def post_register():
         # ユーザーを登録
         session.add(user)
         session.commit();
+        print("ユーザー登録完了")
         print(user.id)
+        # ログインページにリダイレクト
+        return redirect("/login")
     except Exception as e:
         print(e)
     return ""
