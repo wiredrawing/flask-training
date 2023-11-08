@@ -35,7 +35,13 @@ def post_register():
         print("ユーザー登録完了")
         print(user.id)
         # ログインページにリダイレクト
-        return redirect("/login")
+        return redirect("/user/register/completed")
     except Exception as e:
         print(e)
     return ""
+
+
+@app.route("/register/completed", methods=['GET'])
+def register_completed():
+    """ユーザー登録完了画面"""
+    return render_template("user/register_completed.html")

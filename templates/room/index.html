@@ -1,5 +1,9 @@
 <h2>現在,稼働中のチャットルーム一覧</h2>
 {% for room in rooms %}
+<section>
   <p><a href="/room/{{room.id}}">{{room.room_name}}</a></p>
   <p>{{room.description}}</p>
+  <p>このチャットルームに参加する</p>
+</section>
+
 {% endfor %}

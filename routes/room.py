@@ -3,6 +3,7 @@ from flask_login import current_user, login_required
 
 from lib.setting import session
 from models.Message import Message
+from models.Participant import Participant
 from models.Room import Room
 from logging import LogRecord, LoggerAdapter, getLogger, handlers
 import logging
@@ -66,6 +67,16 @@ def index():
 def room(room_id):
     if current_user.is_authenticated is not True:
         return redirect("/login")
+
+    # アクセス中ユーザーが当該チャットルームに参加しているかどうかを確認
+    participant = session.query(Participant).filter(
+        Participant.room_id == room_id,
+        Participant.user_id == current_user.id
+    ).first()
+
+    if participant is None:
+        return redirect("/room")
+
     print(current_user)
     print(current_user.get_id())
     print("current_user.id ===> {}".format(current_user.id))

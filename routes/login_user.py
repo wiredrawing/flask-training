@@ -50,7 +50,9 @@ def authorize():
             # http_session["user_id"] = user.id
             # print(http_session)
 
-            login_user(user, True)
+            result = login_user(user, True)
+            if result is not True:
+                raise Exception("認証処理に失敗しました")
 
             # ダッシュボードにリダイレクト(ログイン後のマイページ)
             return redirect("/dashboard")

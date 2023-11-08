@@ -4,7 +4,7 @@
 # for value in sys.path:
 #     print(value)
 
-from sqlalchemy import Column, Integer, Text, ForeignKey
+from sqlalchemy import Column, Integer, Text, ForeignKey, Date
 from sqlalchemy.orm import relationship
 
 from lib.setting import engine, base, session
@@ -26,6 +26,9 @@ class Message(base):
     message = Column(Text(), nullable=False, comment="メッセージ")
     room_id = Column(Integer, ForeignKey('rooms.id'), nullable=False, comment="ルームID")
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False, comment="ユーザーID")
+
+    created_at = Column(Date, nullable=True, comment="作成日時")
+    deleted_at = Column(Date, nullable=True, comment="削除日時")
 
 if __name__ == "__main__":
     # テーブル作成
