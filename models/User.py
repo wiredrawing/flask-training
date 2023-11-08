@@ -42,7 +42,6 @@ class User(UserMixin, base):
         "comment": "ユーザーモデル",
     }
 
-
     id = Column(Integer, primary_key=True, autoincrement=True, comment="ユーザーID")
     # emailはユニークとする
     email = Column(Text(), nullable=False, comment="メールアドレス", unique=True)
@@ -65,7 +64,10 @@ class User(UserMixin, base):
     participants = relationship("Participant", backref="user")
 
     # 対象レコードのユーザーが発言したメッセージ一覧を取得する
-    messages = relationship("Message", backref="user")
+    # メッセージは最新の投稿順に取得する
+    messages = relationship("Message", order_by="Message.id.desc()", backref="user")
+    # id asc順に取得
+    # messages = relationship("Message", order_by="Message.id.asc()", backref="user")
 
 
 # Do hash password.

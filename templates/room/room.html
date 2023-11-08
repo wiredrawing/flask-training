@@ -9,7 +9,7 @@
 {% endfor %}
 
 
-<form action="/room/message/create/{{room.id}}" method="post">
+<form action="/room/{{room.id}}/message/create/" method="post">
   <input type="hidden" name="user_id" value="{{user.id}}">
   <p>メッセージ</p>
   <input type="text" name="message">

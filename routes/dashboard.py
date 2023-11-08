@@ -11,6 +11,17 @@ def dashboard():
         print("=====================================")
     user_id = http_session["user_id"]
     user = session.query(User).filter(User.id == user_id).first()
+    print(type(user.messages))
+    for message in user.messages:
+        print(message)
+        print(message.id)
+        print(message.message)
+
+    # print(type(user.reverse_messages))
+    # for message in user.reverse_messages:
+    #     print(message)
+    #     print(message.id)
+    #     print(message.message)
     print("==================");
     return render_template("dashboard/dashboard.html", user=user)
 

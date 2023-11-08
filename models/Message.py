@@ -27,7 +27,6 @@ class Message(base):
     room_id = Column(Integer, ForeignKey('rooms.id'), nullable=False, comment="ルームID")
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False, comment="ユーザーID")
 
-
 if __name__ == "__main__":
     # テーブル作成
     base.metadata.create_all(engine)

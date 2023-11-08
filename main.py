@@ -6,6 +6,7 @@ from datetime import timedelta
 from flask import Flask, request, make_response, render_template, jsonify, Blueprint, session as http_session, redirect
 from flask_login import current_user, LoginManager, decode_cookie, encode_cookie
 from sqlalchemy.orm import Session
+from werkzeug import Response
 
 from lib.setting import session, engine
 from models.Participant import Participant
@@ -298,60 +299,61 @@ def add_message():
 #     return response
 
 
-@app.route("/room/add/", methods=['GET'])
-def room_form():
-    """
-    チャットルームを追加する
-    :return:
-    """
-    return render_template("room/add_room.html")
-
-
-@app.route("/room/add/", methods=['POST'])
-def add_post():
-    request_data = request.form
-    if len(request_data["room_name"]) == 0 and len(request_data["description"]) == 0:
-        return "Room名および概要説明は必須項目です"
-    try:
-        room = Room();
-        room.room_name = request_data["room_name"]
-        room.description = request_data["description"]
-        session.add(room)
-        session.commit()
-    except Exception as e:
-        session.rollback()
-        print(e)
-
-    return "ルームを追加しました"
+# @app.route("/room/add/", methods=['GET'])
+# def room_form():
+#     """
+#     チャットルームを追加する
+#     :return:
+#     """
+#     return render_template("room/add_room.html")
+#
+#
+# @app.route("/room/add/", methods=['POST'])
+# def add_post():
+#     request_data = request.form
+#     if len(request_data["room_name"]) == 0 and len(request_data["description"]) == 0:
+#         return "Room名および概要説明は必須項目です"
+#     try:
+#         room = Room();
+#         room.room_name = request_data["room_name"]
+#         room.description = request_data["description"]
+#         session.add(room)
+#         session.commit()
+#     except Exception as e:
+#         session.rollback()
+#         print(e)
+#
+#     return "ルームを追加しました"
 
 
 # 指定したルーティング以外は認証を必須とする
 # もし非認証だった場合はログインページにリダイレクトする
 @app.before_request
-def hook():
+def hook() -> Response | None:
     # ログインフォーム以外はログイン済みであることを確認する
-    if request.path == "/login" or request.path == "/login/":
+    if (request.path.find("/login")) != -1:
         # ログインフォームは非認証状態でもアクセス可能
-        pass
-    else :
-        if current_user.is_authenticated is not True:
-            return redirect("/login")
-        else:
-            # 認証済みであればOK
-            print("----------------------------------")
-            print(request.path)
-            print(request.url)
-            print("すでにログイン済みです")
-            print("=============================")
-            print(dir(request))
-            print('endpoint: %s, url: %s, path: %s' % (
-                request.endpoint,
-                request.url,
-                request.path))
-            print(request.environ)
-            print(current_user.id)
-            print("=============================")
-            print(request)
+        return None
+
+    if current_user.is_authenticated is not True:
+        return redirect("/login")
+    else:
+        # 認証済みであればOK
+        print("----------------------------------")
+        print(request.path)
+        print(request.url)
+        print("すでにログイン済みです")
+        print("=============================")
+        print(dir(request))
+        print('endpoint: %s, url: %s, path: %s' % (
+            request.endpoint,
+            request.url,
+            request.path))
+        print(request.environ)
+        print(current_user.id)
+        print("=============================")
+        print(request)
+    return None
 
 
 if __name__ == "__main__":

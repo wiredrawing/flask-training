@@ -15,8 +15,10 @@ class Room(base):
     id = Column(Integer, primary_key=True, autoincrement=True, comment="ルームID")
     room_name = Column(Text(), nullable=False, comment="ルーム名")
     description = Column(Text(), nullable=False, comment="ルームの説明")
-    messages = relationship("Message", backref=backref("room"))
-    # messages = relationship("Message", backref="room", secondary=Message.__table__, order_by=Message.id.desc())
+
+    # メッセージを最新の投稿順に取得する
+    messages = relationship("Message", order_by="Message.id.desc()", backref=backref("room"))
+
 
 
 if __name__ == "__main__":
