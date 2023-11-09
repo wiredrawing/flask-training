@@ -3,20 +3,30 @@ from flask import Blueprint, render_template, request, redirect
 
 from lib.setting import session
 from models.User import User
+from routes.CreateUserForm import CreateUserForm
 
 app = Blueprint('register_user', __name__, url_prefix='/user')
 
 
 # 参考URL: https://qiita.com/miyakiyo/items/34617adaf77acf8b4511
 # 新規ユーザー登録のルーティング
-@app.route("/register", methods=['GET'])
+@app.route("/register/", methods=['GET'])
 def register():
-    return render_template("user/register.html")
+    form = CreateUserForm(request.form)
+    return render_template("user/register.html", form=form)
 
 
-@app.route("/register", methods=['POST'])
+@app.route("/register/", methods=['POST'])
 def post_register():
     try:
+        form = CreateUserForm(request.form)
+        print("------------------------------------------------")
+        if form.validate() is not True:
+            print("バリデーションエラー")
+            print(form.errors)
+            return render_template("user/register.html", form=form)
+
+        print(form)
         # 辞書型に変換してPOSTデータを取得する
         post_data = request.form.to_dict()
         print(post_data)
@@ -41,7 +51,7 @@ def post_register():
     return ""
 
 
-@app.route("/register/completed", methods=['GET'])
+@app.route("/register/completed/", methods=['GET'])
 def register_completed():
     """ユーザー登録完了画面"""
     return render_template("user/register_completed.html")

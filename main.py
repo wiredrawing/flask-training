@@ -81,10 +81,18 @@ def hello():
     for message in messages:
         print(message)
 
+    user = session.query(User).filter(User.id == current_user.id).first()
+    if user is None:
+        raise Exception("ユーザーが存在しません")
+    # end
+
     params = {
         "template_title": "flask test",
-        "template_message": "ここにテンプレートに渡す値を設定する"
+        "template_message": "ここにテンプレートに渡す値を設定する",
+        "current_user": current_user,
+        "user": user,
     }
+    print(user.messages)
     return render_template("index.html", **params)
 
 
