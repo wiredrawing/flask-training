@@ -61,3 +61,4 @@ def authorize():
     except Exception as e:
         print(type(e))
         print(e);
+        return redirect("/login")

@@ -1,7 +1,7 @@
 import re
 
 from email_validator import validate_email, EmailNotValidError
-from wtforms import Form, BooleanField, StringField, PasswordField, validators, ValidationError
+from wtforms import Form, BooleanField, StringField, PasswordField, validators, ValidationError, IntegerField
 
 
 def original_password(message):
@@ -28,10 +28,10 @@ def check_email(form, field):
 class CreateUserForm(Form):
     """新規ユーザー登録用のフォーム"""
     username = StringField('Username', [
-        validators.Length(min=4, max=25)
+        validators.Length(min=4, max=25, message="ユーザー名は4文字以上25文字以下で入力して下さい"),
     ])
     email = StringField('Email Address', [
-        validators.Length(min=6, max=35),
+        validators.Length(min=6, max=35, message="メールアドレスは6文字以上35文字以下で入力して下さい"),
         check_email,
     ])
     password = PasswordField('New Password', [
@@ -40,5 +40,9 @@ class CreateUserForm(Form):
         validators.DataRequired(message="パスワードは必須項目となります"),
         validators.EqualTo("confirm", message="You need to input the same password in both fields")
     ]);
-
-    confirm = PasswordField('Repeat Password')
+    confirm = PasswordField('Repeat Password', [
+        # 独自ルールの追加は,特定のフォーマットで関数を定義する
+        original_password(message="指定のフォーマットで入力して下さい"),
+        validators.DataRequired(message="確認要パスワードは必須項目となります"),
+    ])
+    gender = IntegerField("性別", [validators.DataRequired(message="性別は必須項目となります")])

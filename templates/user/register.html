@@ -1,16 +1,16 @@
-{% from "user/_form_helpers.html" import render_field %}
+{% from "_form_helpers.html" import render_field %}
 
 <h1>新規ユーザーの追加</h1>
 <form action="/user/register" method="post">
 
   {{ render_field(form.email)}}
-  <p><input type="email" name="email" placeholder="メールアドレス"/></p>
+  <p><input type="email" name="email" value="{{form.email.data}}" placeholder="メールアドレス"/></p>
   {{ render_field(form.username)}}
-  <p><input type="text" name="username" placeholder="ユーザー名"/></p>
+  <p><input type="text" name="username" value="{{form.username.data}}" placeholder="ユーザー名"/></p>
   {{ render_field(form.password)}}
   <p><input type="text" name="password" placeholder="パスワード"/></p>
   {{ render_field(form.confirm)}}
   <p><input type="text" name="confirm" placeholder="確認用パスワード"/></p>
-  <p><input type="text" name="gender" placeholder="性別"/></p>
+  <p><input type="text" name="gender" value="{{form.gender.data}}" placeholder="性別"/></p>
   <p><input type="submit" value="新規ユーザーの追加"/></p>
 </form>

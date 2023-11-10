@@ -1,4 +1,6 @@
 from flask import Flask, Blueprint, session as http_session, render_template, request, redirect
+from flask_login import current_user
+
 from lib.setting import session, engine
 from models.User import User
 
@@ -7,9 +9,12 @@ app = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 
 @app.route("/", methods=['GET'])
 def dashboard():
-    if "user_id" in http_session:
-        print("=====================================")
-    user_id = http_session["user_id"]
+    # print(">>>>>>>>>>>>>>>>>>>>>>>>>")
+    # print(http_session)
+    # if "user_id" in http_session:
+    #     print("=====================================")
+    # user_id = http_session["user_id"]
+    user_id = current_user.id
     user = session.query(User).filter(User.id == user_id).first()
     print(type(user.messages))
     for message in user.messages:

@@ -8,6 +8,9 @@ from models.Room import Room
 from logging import LogRecord, LoggerAdapter, getLogger, handlers
 import logging
 
+from routes.CreateParticipantForm import CreateParticipantForm
+from routes.CreateRoomForm import CreateRoomForm
+
 app = Blueprint('room', __name__, url_prefix='/room')
 
 
@@ -60,7 +63,7 @@ def index():
     # 現在稼働中のチャットルーム一覧を表示
     rooms = session.query(Room).all()
     """現在,作成されているチャットルーム一覧を表示"""
-    return render_template("room/index.html", rooms=rooms)
+    return render_template("room/index.html", rooms=rooms, user_id=current_user.id)
 
 
 @app.route("/<int:room_id>", methods=['GET'])
@@ -121,12 +124,19 @@ def room_form():
     チャットルームを追加する
     :return:
     """
-    return render_template("room/add_room.html")
+    form = CreateRoomForm(request.form)
+    return render_template("room/add_room.html", form=form)
 
 
 @app.route("/add/", methods=['POST'])
 def add_post():
     request_data = request.form
+    form = CreateRoomForm(request.form);
+
+    if form.validate() is not True:
+        """バリデーションエラーの場合はエラーを表示"""
+        return render_template("room/add_room.html", form=form)
+
     if len(request_data["room_name"]) == 0 and len(request_data["description"]) == 0:
         return "Room名および概要説明は必須項目です"
     try:
@@ -134,7 +144,7 @@ def add_post():
         description = request_data["description"]
         # 同名のルームが存在する場合はエラー
         room_exists = session.query(Room).filter(Room.room_name == room_name).first()
-        if (room_exists is not None):
+        if room_exists is not None:
             # 既に存在している場合はそのルームにリダイレクト
             return redirect("/room/{}".format(room_exists.id))
         room = Room();
@@ -149,3 +159,28 @@ def add_post():
     # 新規ルームを作成したら
     # 既存ルーム一覧にリダイレクト
     return redirect("/room/")
+
+
+@app.route("/join", methods=['POST'])
+def join_room():
+    try:
+        """ルームに参加するユーザーを登録するようバリデーターフォーム"""
+        form = CreateParticipantForm(request.form)
+
+        if form.validate() is not True:
+            return redirect("/room/")
+        # end
+
+        print(form);
+        print("================>????????????")
+        # バリデーションをパスした場合
+        participant = Participant()
+        participant.room_id = form.room_id.data
+        participant.user_id = form.user_id.data
+        session.add(participant)
+        session.commit()
+        return "指定したルームに参加しました"
+    except Exception as e:
+        print(e)
+        session.rollback()
+        return "指定したルームに参加できませんでした"
