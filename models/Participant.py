@@ -1,16 +1,11 @@
-from sqlalchemy import Column, Integer, Text, ForeignKey
+from sqlalchemy import Column, Integer, Text, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from lib.setting import session, base, engine
 
 
-
 class Participant(base):
     __tablename__ = 'participants'
-    __table_args__ = {
-        'mysql_collate': 'utf8_general_ci',
-        "comment": "参加者モデル",
-    }
 
     id = Column(Integer, primary_key=True, autoincrement=True, comment="参加者ID")
     room_id = Column(Integer, ForeignKey("rooms.id"), nullable=False, comment="ルームID")
@@ -19,7 +14,15 @@ class Participant(base):
 
     # belongs_toの場合 => back_populates で関連付けると動作する
     # user = relationship("User", back_populates="participants")
+    room = relationship("Room", )
 
+    # 複数のカラムでユニークキーを設定する場合は、UniqueConstraintを使う
+    __table_args__ = (
+        (UniqueConstraint('room_id', 'user_id', name='unique_room_id_user_id')),
+        {
+            'mysql_collate': 'utf8_general_ci',
+            "comment": "参加者モデル",
+        })
 
 if __name__ == "__main__":
     base.metadata.create_all(engine)

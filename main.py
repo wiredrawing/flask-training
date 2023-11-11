@@ -346,21 +346,22 @@ def hook() -> Response | None:
     if current_user.is_authenticated is not True:
         return redirect("/login")
     else:
+        pass
         # 認証済みであればOK
-        print("----------------------------------")
-        print(request.path)
-        print(request.url)
-        print("すでにログイン済みです")
-        print("=============================")
-        print(dir(request))
-        print('endpoint: %s, url: %s, path: %s' % (
-            request.endpoint,
-            request.url,
-            request.path))
-        print(request.environ)
-        print(current_user.id)
-        print("=============================")
-        print(request)
+        # print("----------------------------------")
+        # print(request.path)
+        # print(request.url)
+        # print("すでにログイン済みです")
+        # print("=============================")
+        # print(dir(request))
+        # print('endpoint: %s, url: %s, path: %s' % (
+        #     request.endpoint,
+        #     request.url,
+        #     request.path))
+        # print(request.environ)
+        # print(current_user.id)
+        # print("=============================")
+        # print(request)
     return None
 
 

@@ -1,3 +1,13 @@
+{% extends 'base_templates/root.html' %}
+
+{% block content %}
 {{user.id}}
 {{user.username}}
 {{user.email}}
+
+
+<h3>現在参加しているチャットルーム</h3>
+{% for participant in user.participants %}
+  <p><a href="/room/{{participant.room.id}}">{{participant.room.room_name}}</a></p>
+{% endfor %}
+{% endblock %}

@@ -14,7 +14,7 @@ try:
     db_name = "flask-test"
     # 接続文字列の作成
     host_name = "mysql://{}:{}@{}/{}?charset=utf8".format(db_user, db_pass, db_host, db_name)
-    engine = create_engine(host_name, echo=True)
+    engine = create_engine(host_name, echo=False)
 
     # モデルクラスの基底クラスを作成
     base = declarative_base()

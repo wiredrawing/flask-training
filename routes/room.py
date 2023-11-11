@@ -161,6 +161,7 @@ def add_post():
     return redirect("/room/")
 
 
+# ルームに参加する処理
 @app.route("/join", methods=['POST'])
 def join_room():
     try:
@@ -168,12 +169,24 @@ def join_room():
         form = CreateParticipantForm(request.form)
 
         if form.validate() is not True:
+            print(form.errors)
+            return ""
             return redirect("/room/")
         # end
 
         print(form);
         print("================>????????????")
         # バリデーションをパスした場合
+        exists_participant = session.query(Participant).filter(
+            Participant.room_id == form.room_id.data,
+            Participant.user_id == form.user_id.data
+        ).first()
+
+        if exists_participant is not None:
+            return "指定したルームには既に参加しています"
+        # end
+
+        # 指定したチャットルームにまだ参加していない場合は参加させる
         participant = Participant()
         participant.room_id = form.room_id.data
         participant.user_id = form.user_id.data

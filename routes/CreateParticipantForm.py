@@ -33,5 +33,5 @@ class CreateParticipantForm(Form):
     room_id = IntegerField("ルームID", [
         validators.DataRequired(message="ルームIDは必須項目となります"),
         # データベースに存在するroom_idであることを保証する
-        check_user_id
+        check_room_id
     ])
