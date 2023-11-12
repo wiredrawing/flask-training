@@ -1,5 +1,5 @@
 from flask_login import UserMixin
-from sqlalchemy import Column, Integer, Text
+from sqlalchemy import Column, Integer, Text, Date, String
 from sqlalchemy.orm import relationship
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -44,11 +44,14 @@ class User(UserMixin, base):
 
     id = Column(Integer, primary_key=True, autoincrement=True, comment="ユーザーID")
     # emailはユニークとする
-    email = Column(Text(), nullable=False, comment="メールアドレス", unique=True)
+    email = Column(String(256), nullable=False, comment="メールアドレス", unique=True)
     password = Column(Text(), nullable=False, comment="パスワード");
     username = Column(Text(), nullable=False, comment="ユーザー名")
     gender = Column(Integer, nullable=False, comment="性別")
 
+    created_at = Column(Date, nullable=False, comment="ユーザー登録日時")
+    updated_at = Column(Date, nullable=True, comment="ユーザー更新日時")
+    deleted_at = Column(Date, nullable=True, comment="ユーザー削除日時")
     """
         User 1: N Participant
         User has many Participant

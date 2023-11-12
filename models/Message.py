@@ -27,8 +27,9 @@ class Message(base):
     room_id = Column(Integer, ForeignKey('rooms.id'), nullable=False, comment="ルームID")
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False, comment="ユーザーID")
 
-    # created_at = Column(Date, nullable=True, comment="作成日時")
-    # deleted_at = Column(Date, nullable=True, comment="削除日時")
+    created_at = Column(Date, nullable=False, comment="作成日時")
+    updated_at = Column(Date, nullable=False, comment="更新日時")
+    deleted_at = Column(Date, nullable=False, comment="削除日時")
 
 if __name__ == "__main__":
     # テーブル作成

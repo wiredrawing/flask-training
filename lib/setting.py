@@ -24,3 +24,16 @@ try:
 except Exception as e:
     print(e);
     print("any error happen")
+
+    # alembic の使い方
+    """
+    >> alembic init <プロジェクト名>
+    versionsフォルダが作成される
+    alembic.iniの中身を書き換える
+    sqlalchemy.url = mysql://<ユーザー名>:<パスワード>@<ホスト名>:<ポート>/<DB名>
+    env.pyにアプリケーションで利用するモデルファイルをよみこませる
+    >> alembic revision --autogenerate -m "create tables"
+    --autogenerate オプションを指定すると、モデルの変更をもとにマイグレーションファイルを自動生成してくれる
+    >> alembic upgrade head
+    でマイグレーションが実行される
+    """
