@@ -15,7 +15,7 @@ from models.User import User
 from models.Message import Message
 
 # 自作外部ファイルルーティングをimport
-from routes import register_user
+from routes import register_user, sse
 from routes import login_user
 from routes import dashboard
 from routes import room
@@ -28,8 +28,8 @@ from app import app
 app.register_blueprint(register_user.app)
 app.register_blueprint(login_user.app)
 app.register_blueprint(dashboard.app)
-
 app.register_blueprint(room.app)
+app.register_blueprint(sse.app)
 
 app.secret_key = "random seckey for flask"
 app.permanent_session_lifetime = timedelta(days=365)

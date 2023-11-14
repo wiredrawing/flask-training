@@ -1,10 +1,11 @@
+from datetime import datetime
 
 # sys.path.append('C:\\Users\\a-sen\\works\\flask')
 #
 # for value in sys.path:
 #     print(value)
 
-from sqlalchemy import Column, Integer, Text, ForeignKey, Date
+from sqlalchemy import Column, Integer, Text, ForeignKey, Date, DateTime
 from sqlalchemy.orm import relationship
 
 from lib.setting import engine, base, session
@@ -27,9 +28,9 @@ class Message(base):
     room_id = Column(Integer, ForeignKey('rooms.id'), nullable=False, comment="ルームID")
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False, comment="ユーザーID")
 
-    created_at = Column(Date, nullable=False, comment="作成日時")
-    updated_at = Column(Date, nullable=False, comment="更新日時")
-    deleted_at = Column(Date, nullable=False, comment="削除日時")
+    created_at = Column(DateTime, nullable=False, comment="作成日時", default=datetime.now())
+    updated_at = Column(DateTime, nullable=False, comment="更新日時", default=datetime.now())
+    deleted_at = Column(DateTime, nullable=False, comment="削除日時", default=datetime.now())
 
 if __name__ == "__main__":
     # テーブル作成

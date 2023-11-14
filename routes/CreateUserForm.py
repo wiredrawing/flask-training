@@ -29,11 +29,12 @@ class CreateUserForm(Form):
     """新規ユーザー登録用のフォーム"""
     username = StringField('Username', [
         validators.Length(min=4, max=25, message="ユーザー名は4文字以上25文字以下で入力して下さい"),
-    ])
+    ], default="")
     email = StringField('Email Address', [
         validators.Length(min=6, max=35, message="メールアドレスは6文字以上35文字以下で入力して下さい"),
         check_email,
-    ])
+        # defaultキーワード引数で初期値を設定できる
+    ], default="")
     password = PasswordField('New Password', [
         # 独自ルールの追加は,特定のフォーマットで関数を定義する
         original_password(message="指定のフォーマットで入力して下さい"),
@@ -45,4 +46,6 @@ class CreateUserForm(Form):
         original_password(message="指定のフォーマットで入力して下さい"),
         validators.DataRequired(message="確認要パスワードは必須項目となります"),
     ])
-    gender = IntegerField("性別", [validators.DataRequired(message="性別は必須項目となります")])
+    gender = IntegerField("性別", [
+        validators.DataRequired(message="性別は必須項目となります")
+    ], default="0")

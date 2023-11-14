@@ -1,5 +1,7 @@
+from datetime import datetime
+
 from flask_login import UserMixin
-from sqlalchemy import Column, Integer, Text, Date, String
+from sqlalchemy import Column, Integer, Text, Date, String, DateTime
 from sqlalchemy.orm import relationship
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -49,9 +51,9 @@ class User(UserMixin, base):
     username = Column(Text(), nullable=False, comment="ユーザー名")
     gender = Column(Integer, nullable=False, comment="性別")
 
-    created_at = Column(Date, nullable=False, comment="ユーザー登録日時")
-    updated_at = Column(Date, nullable=True, comment="ユーザー更新日時")
-    deleted_at = Column(Date, nullable=True, comment="ユーザー削除日時")
+    created_at = Column(DateTime, default=datetime.now(), nullable=False, comment="ユーザー登録日時")
+    updated_at = Column(DateTime, default=datetime.now(), nullable=True, comment="ユーザー更新日時")
+    deleted_at = Column(DateTime, default=datetime.now(), nullable=True, comment="ユーザー削除日時")
     """
         User 1: N Participant
         User has many Participant

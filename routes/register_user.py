@@ -13,6 +13,8 @@ app = Blueprint('register_user', __name__, url_prefix='/user')
 @app.route("/register/", methods=['GET'])
 def register():
     form = CreateUserForm(request.form)
+    print(form);
+    print(form.email.data)
     return render_template("user/register.html", form=form)
 
 

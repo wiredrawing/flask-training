@@ -1,8 +1,8 @@
-"""create initialize table
+"""create migration tables
 
-Revision ID: ac9193f37e24
+Revision ID: f8fe1f3dded0
 Revises: 
-Create Date: 2023-11-13 00:12:41.340424
+Create Date: 2023-11-14 22:35:42.279582
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'ac9193f37e24'
+revision: str = 'f8fe1f3dded0'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -24,9 +24,9 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False, comment='ルームID'),
     sa.Column('room_name', sa.String(length=256), nullable=False, comment='ルーム名'),
     sa.Column('description', sa.Text(), nullable=False, comment='ルームの説明'),
-    sa.Column('created_at', sa.Date(), nullable=False, comment='作成日時'),
-    sa.Column('updated_at', sa.Date(), nullable=True, comment='更新日時※メッセージが投稿されるたびアップデートする'),
-    sa.Column('deleted_at', sa.Date(), nullable=True, comment='削除日時'),
+    sa.Column('created_at', sa.DateTime(), nullable=False, comment='作成日時'),
+    sa.Column('updated_at', sa.DateTime(), nullable=True, comment='更新日時※メッセージが投稿されるたびアップデートする'),
+    sa.Column('deleted_at', sa.DateTime(), nullable=True, comment='削除日時'),
     sa.PrimaryKeyConstraint('id'),
     comment='ルームモデル',
     mysql_collate='utf8_general_ci'
@@ -37,9 +37,9 @@ def upgrade() -> None:
     sa.Column('password', sa.Text(), nullable=False, comment='パスワード'),
     sa.Column('username', sa.Text(), nullable=False, comment='ユーザー名'),
     sa.Column('gender', sa.Integer(), nullable=False, comment='性別'),
-    sa.Column('created_at', sa.Date(), nullable=False, comment='ユーザー登録日時'),
-    sa.Column('updated_at', sa.Date(), nullable=True, comment='ユーザー更新日時'),
-    sa.Column('deleted_at', sa.Date(), nullable=True, comment='ユーザー削除日時'),
+    sa.Column('created_at', sa.DateTime(), nullable=False, comment='ユーザー登録日時'),
+    sa.Column('updated_at', sa.DateTime(), nullable=True, comment='ユーザー更新日時'),
+    sa.Column('deleted_at', sa.DateTime(), nullable=True, comment='ユーザー削除日時'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email'),
     comment='ユーザーモデル',
@@ -50,9 +50,9 @@ def upgrade() -> None:
     sa.Column('message', sa.Text(), nullable=False, comment='メッセージ'),
     sa.Column('room_id', sa.Integer(), nullable=False, comment='ルームID'),
     sa.Column('user_id', sa.Integer(), nullable=False, comment='ユーザーID'),
-    sa.Column('created_at', sa.Date(), nullable=False, comment='作成日時'),
-    sa.Column('updated_at', sa.Date(), nullable=False, comment='更新日時'),
-    sa.Column('deleted_at', sa.Date(), nullable=False, comment='削除日時'),
+    sa.Column('created_at', sa.DateTime(), nullable=False, comment='作成日時'),
+    sa.Column('updated_at', sa.DateTime(), nullable=False, comment='更新日時'),
+    sa.Column('deleted_at', sa.DateTime(), nullable=False, comment='削除日時'),
     sa.ForeignKeyConstraint(['room_id'], ['rooms.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id'),
@@ -63,8 +63,8 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False, comment='参加者ID'),
     sa.Column('room_id', sa.Integer(), nullable=False, comment='ルームID'),
     sa.Column('user_id', sa.Integer(), nullable=False, comment='ユーザーID'),
-    sa.Column('created_at', sa.Date(), nullable=False, comment='作成日時'),
-    sa.Column('updated_at', sa.Date(), nullable=False, comment='更新日時'),
+    sa.Column('created_at', sa.DateTime(), nullable=False, comment='作成日時'),
+    sa.Column('updated_at', sa.DateTime(), nullable=False, comment='更新日時'),
     sa.ForeignKeyConstraint(['room_id'], ['rooms.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id'),
