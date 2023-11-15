@@ -24,6 +24,7 @@ def check_email(form, field):
     try:
         validated_email = validate_email(field.data)
         email = validated_email.normalized
+        return None;
     except EmailNotValidError as e:
         raise ValidationError("メールアドレスのフォーマットが不正です")
 
@@ -34,7 +35,8 @@ def duplicate_email(form, field):
     ).first()
     if user is not None:
         raise ValidationError("指定されたメールアドレスは使用できません")
-    return True;
+    return None
+
 
 class CreateUserForm(Form):
     """新規ユーザー登録用のフォーム"""
