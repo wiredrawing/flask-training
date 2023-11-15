@@ -1,13 +1,19 @@
+<script>
 
 
-<h2>Room: {{room.room_name}}に投稿したメッセージ一覧</h2>
 
-{% for message in messages %}
-  <p>ID: {{message.id}}</p>
-  <p>メッセージ: {{message.message}}</p>
-  <p>発言者: {{message.user.username}}</p>
-{% endfor %}
-
+  const eventSource = new EventSource("/sse/messages/{{room.id}}");
+  eventSource.onmessage = function (event) {
+    console.log(event.data)
+    // const data = JSON.parse(event.data);
+    // console.log(data);
+    // const message = data.message;
+    // const user = data.user;
+    // const messageElement = document.createElement("p");
+    // messageElement.innerHTML = `メッセージ: ${message.message} 発言者: ${user.username}`;
+    // document.body.appendChild(messageElement);
+  }
+</script>
 
 <form action="/room/{{room.id}}/message/create/" method="post">
   <input type="hidden" name="user_id" value="{{user.id}}">
@@ -16,3 +22,12 @@
   <input type="submit" value="投稿">
 
 </form>
+
+
+<h2>Room: {{room.room_name}}に投稿したメッセージ一覧</h2>
+<a target="_blank" href="/sse/messages/{{room.id}}">SSEでメッセージを取得する</a>
+{% for message in messages %}
+  <p>ID: {{message.id}}</p>
+  <p>メッセージ: {{message.message}}</p>
+  <p>発言者: {{message.user.username}}</p>
+{% endfor %}

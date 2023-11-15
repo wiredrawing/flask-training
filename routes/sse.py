@@ -20,21 +20,22 @@ def messages_on_room(room_id):
 
 
 def _fetch_message(room_id, current_time):
-
     latest_id = 0
     while True:
         # 指定したroom_idのアクセス時点より最新のメッセージを取得する
         if latest_id == 0:
             messages = session.query(Message).filter(
                 Message.room_id == room_id,
-                Message.created_at > current_time,
+                Message.created_at >= current_time,
             ).all()
-        else :
+        else:
             messages = session.query(Message).filter(
                 Message.room_id == room_id,
                 Message.id > latest_id,
             ).all()
         print(messages)
+        if len(messages) > 0:
+            print("メッセージを取得-------------");
         for message in messages:
             message_obj = {
                 "message": message.message,

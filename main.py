@@ -338,6 +338,8 @@ def add_message():
 # もし非認証だった場合はログインページにリダイレクトする
 @app.before_request
 def hook() -> Response | None:
+    if request.path.find("/sse") != -1:
+        return None
     # ログインフォーム以外はログイン済みであることを確認する
     if (request.path.find("/login")) != -1 or (request.path.find("/user/register")) != -1:
         # ログインフォームは非認証状態でもアクセス可能

@@ -26,7 +26,6 @@ class Room(base):
     messages = relationship("Message", order_by="Message.id.desc()", backref=backref("room"))
 
 
-
 if __name__ == "__main__":
     # デーブルの作成処理
     base.metadata.create_all(engine)
