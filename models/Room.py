@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, Text, Date, String, DateTime
+from sqlalchemy import Column, Integer, Text, Date, String, DateTime, func
 from sqlalchemy.orm import relationship, backref
 
 from lib.setting import session, base, engine
@@ -18,9 +18,9 @@ class Room(base):
     room_name = Column(String(256), nullable=False, comment="ルーム名")
     description = Column(Text(), nullable=False, comment="ルームの説明")
 
-    created_at = Column(DateTime, nullable=False, comment="作成日時", default=datetime.now())
-    updated_at = Column(DateTime, nullable=True, comment="更新日時※メッセージが投稿されるたびアップデートする", default=datetime.now())
-    deleted_at = Column(DateTime, nullable=True, comment="削除日時", default=datetime.now())
+    created_at = Column(DateTime, nullable=False, comment="作成日時", default=func.now())
+    updated_at = Column(DateTime, nullable=True, comment="更新日時※メッセージが投稿されるたびアップデートする", default=func.now())
+    deleted_at = Column(DateTime, nullable=True, comment="削除日時", default=func.now())
 
     # メッセージを最新の投稿順に取得する
     messages = relationship("Message", order_by="Message.id.desc()", backref=backref("room"))

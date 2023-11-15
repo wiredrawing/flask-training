@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, Text, ForeignKey, UniqueConstraint, Date, DateTime
+from sqlalchemy import Column, Integer, Text, ForeignKey, UniqueConstraint, Date, DateTime, func
 from sqlalchemy.orm import relationship
 
 from lib.setting import session, base, engine
@@ -14,8 +14,8 @@ class Participant(base):
     # users.idを外部キーに設定
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, comment="ユーザーID")
 
-    created_at = Column(DateTime, nullable=False, comment="作成日時", default=datetime.now())
-    updated_at = Column(DateTime, nullable=False, comment="更新日時", default=datetime.now())
+    created_at = Column(DateTime, nullable=False, comment="作成日時", default=func.now())
+    updated_at = Column(DateTime, nullable=False, comment="更新日時", default=func.now())
 
     # belongs_toの場合 => back_populates で関連付けると動作する
     # user = relationship("User", back_populates="participants")

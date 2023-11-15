@@ -3,6 +3,9 @@ import re
 from email_validator import validate_email, EmailNotValidError
 from wtforms import Form, BooleanField, StringField, PasswordField, validators, ValidationError, IntegerField
 
+from lib.setting import session
+from models.User import User
+
 
 def original_password(message):
     def rule(form, field):
@@ -25,6 +28,14 @@ def check_email(form, field):
         raise ValidationError("メールアドレスのフォーマットが不正です")
 
 
+def duplicate_email(form, field):
+    user = session.query(User).filter(
+        User.email == field.data,
+    ).first()
+    if user is not None:
+        raise ValidationError("指定されたメールアドレスは使用できません")
+    return True;
+
 class CreateUserForm(Form):
     """新規ユーザー登録用のフォーム"""
     username = StringField('Username', [
@@ -33,6 +44,7 @@ class CreateUserForm(Form):
     email = StringField('Email Address', [
         validators.Length(min=6, max=35, message="メールアドレスは6文字以上35文字以下で入力して下さい"),
         check_email,
+        duplicate_email,
         # defaultキーワード引数で初期値を設定できる
     ], default="")
     password = PasswordField('New Password', [

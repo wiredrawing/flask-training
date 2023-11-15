@@ -5,7 +5,7 @@ from datetime import datetime
 # for value in sys.path:
 #     print(value)
 
-from sqlalchemy import Column, Integer, Text, ForeignKey, Date, DateTime
+from sqlalchemy import Column, Integer, Text, ForeignKey, Date, DateTime, func
 from sqlalchemy.orm import relationship
 
 from lib.setting import engine, base, session
@@ -27,10 +27,12 @@ class Message(base):
     message = Column(Text(), nullable=False, comment="メッセージ")
     room_id = Column(Integer, ForeignKey('rooms.id'), nullable=False, comment="ルームID")
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False, comment="ユーザーID")
+    # サーバーのデフォルト値を設定する場合
+    # func.now()を設定する
+    created_at = Column(DateTime, nullable=False, comment="作成日時", default=func.now())
+    updated_at = Column(DateTime, nullable=False, comment="更新日時", default=func.now())
+    deleted_at = Column(DateTime, nullable=False, comment="削除日時", default=func.now())
 
-    created_at = Column(DateTime, nullable=False, comment="作成日時", default=datetime.now())
-    updated_at = Column(DateTime, nullable=False, comment="更新日時", default=datetime.now())
-    deleted_at = Column(DateTime, nullable=False, comment="削除日時", default=datetime.now())
 
 if __name__ == "__main__":
     # テーブル作成
