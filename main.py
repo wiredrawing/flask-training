@@ -8,6 +8,7 @@ from flask_login import current_user, LoginManager, decode_cookie, encode_cookie
 from sqlalchemy.orm import Session
 from werkzeug import Response
 
+from lib.logger import get_app_logger
 from lib.setting import session, engine
 from models.Participant import Participant
 from models.Room import Room
@@ -60,22 +61,24 @@ class Middleware:
 app.wsgi_app = Middleware(app.wsgi_app)
 
 
-@app.route("/loop")
-def loop():
-    def inner():
-        # 無限ループでServer Sent Eventを実行する
-        while True:
-            yield "これは無限ループのSSEエンドポイントです{}{}".format("\n", "\n")
-            time.sleep(1)
-
-    response = make_response(inner())
-    response.headers["Content-Type"] = "text/event-stream; charset=UTF-8"
-    return response
+# @app.route("/loop")
+# def loop():
+#     def inner():
+#         # 無限ループでServer Sent Eventを実行する
+#         while True:
+#             yield "これは無限ループのSSEエンドポイントです{}{}".format("\n", "\n")
+#             time.sleep(1)
+#
+#     response = make_response(inner())
+#     response.headers["Content-Type"] = "text/event-stream; charset=UTF-8"
+#     return response
 
 
 # TOPページ
 @app.route('/')
 def hello():
+    logger = get_app_logger()
+    logger.error("TOPページへアクセス中 --------------------------------->")
     # DB接続のテスト
     messages = session.query(Message.message).all()
     for message in messages:
@@ -116,81 +119,81 @@ def post_method():
     return response
 
 
-# server sent eventを動作させる場合は以下のように実装する
-@app.route("/api/v1/users", methods=['GET'])
-def api_users():
-    def sse_response():
-        for value in range(1000):
-            yield f"data: 現在の値 => {value}\n\n"
-            time.sleep(1)
-        pass
-
-    response = make_response(sse_response())
-    response.headers["Content-Type"] = "text/event-stream; charset=UTF-8"
-    return response
-
-
-@app.route("/add/somedata/to/db", methods=['GET'])
-def add_somedata_to_db():
-    # 何かしらユーザーデータを登録する
-    user = User();
-    user.username = "testuser"
-    user.gender = 1;
-    session.add(user)
-    session.commit()
-
-    def inner():
-        # 新規データを登録後,全レコードを取得する
-        users = session.query(User).all()
-        for user in users:
-            yield f"data: {user.username}\n\n"
-            time.sleep(1)
-        pass
-
-    inner_variable = inner
-
-    # トランザクションを使用した場合
-    try:
-        session.begin()
-        transaction_user = User()
-        transaction_user.username = "transaction_user"
-        transaction_user.gender = 2
-        session.add(transaction_user)
-        session.commit()
-    except Exception as e:
-        print(e)
-        session.rollback()
-    # server sent eventでレコードを垂れ流してみる
-    response = make_response(inner_variable())
-    response.headers["Content-Type"] = "text/event-stream; charset=UTF-8"
-    return response
+# # server sent eventを動作させる場合は以下のように実装する
+# @app.route("/api/v1/users", methods=['GET'])
+# def api_users():
+#     def sse_response():
+#         for value in range(1000):
+#             yield f"data: 現在の値 => {value}\n\n"
+#             time.sleep(1)
+#         pass
+# 
+#     response = make_response(sse_response())
+#     response.headers["Content-Type"] = "text/event-stream; charset=UTF-8"
+#     return response
 
 
-# scoped_sessionを使わない場合
-@app.route("/just/in/time/add", methods=['GET'])
-def just_in_time_add():
-    session = Session(engine)
-    try:
-        session.begin();
-        room = Room();
-        room.room_name = "★ここは40代男性のみのルームです";
-        room.description = "★40代男性のみのルームです";
-        session.add(room)
-        session.commit();
-    except Exception as e:
-        session.rollback();
+# @app.route("/add/somedata/to/db", methods=['GET'])
+# def add_somedata_to_db():
+#     # 何かしらユーザーデータを登録する
+#     user = User();
+#     user.username = "testuser"
+#     user.gender = 1;
+#     session.add(user)
+#     session.commit()
+# 
+#     def inner():
+#         # 新規データを登録後,全レコードを取得する
+#         users = session.query(User).all()
+#         for user in users:
+#             yield f"data: {user.username}\n\n"
+#             time.sleep(1)
+#         pass
+# 
+#     inner_variable = inner
+# 
+#     # トランザクションを使用した場合
+#     try:
+#         session.begin()
+#         transaction_user = User()
+#         transaction_user.username = "transaction_user"
+#         transaction_user.gender = 2
+#         session.add(transaction_user)
+#         session.commit()
+#     except Exception as e:
+#         print(e)
+#         session.rollback()
+#     # server sent eventでレコードを垂れ流してみる
+#     response = make_response(inner_variable())
+#     response.headers["Content-Type"] = "text/event-stream; charset=UTF-8"
+#     return response
 
-    rooms = session.query(Room).all()
 
-    def inner():
-        for room in rooms:
-            yield f"data: {room.room_name}\n\n"
-            time.sleep(1)
-        pass
-
-    response = make_response(inner());
-    response.headers["Content-Type"] = "text/event-stream; charset=UTF-8"
-    return response
+# # scoped_sessionを使わない場合
+# @app.route("/just/in/time/add", methods=['GET'])
+# def just_in_time_add():
+#     session = Session(engine)
+#     try:
+#         session.begin();
+#         room = Room();
+#         room.room_name = "★ここは40代男性のみのルームです";
+#         room.description = "★40代男性のみのルームです";
+#         session.add(room)
+#         session.commit();
+#     except Exception as e:
+#         session.rollback();
+#
+#     rooms = session.query(Room).all()
+#
+#     def inner():
+#         for room in rooms:
+#             yield f"data: {room.room_name}\n\n"
+#             time.sleep(1)
+#         pass
+#
+#     response = make_response(inner());
+#     response.headers["Content-Type"] = "text/event-stream; charset=UTF-8"
+#     return response
 
 
 # @app.route("/login", methods=['GET'])

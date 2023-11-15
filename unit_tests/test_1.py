@@ -19,8 +19,7 @@ class TestCreateUserForm(unittest.TestCase):
             check_email(form_mock, field_mock)
 
     def test_duplicate_email_success(self):
-        with patch("routes.CreateUserForm.duplicate_email.session") as mock:
-            mock.return_value = None
+
         form_mock = MagicMock();
         field_mock = MagicMock(data="test@gmail.com")
         self.assertEqual(duplicate_email(form_mock, field_mock), None)

@@ -1,12 +1,11 @@
 from flask import Flask, Blueprint, render_template, redirect, request
 from flask_login import current_user, login_required
 
+from lib.logger import get_app_logger
 from lib.setting import session
 from models.Message import Message
 from models.Participant import Participant
 from models.Room import Room
-from logging import LogRecord, LoggerAdapter, getLogger, handlers
-import logging
 
 from routes.CreateParticipantForm import CreateParticipantForm
 from routes.CreateRoomForm import CreateRoomForm
@@ -14,35 +13,36 @@ from routes.CreateRoomForm import CreateRoomForm
 app = Blueprint('room', __name__, url_prefix='/room')
 
 
-def get_app_logger():
-    try:
-        # 全体のログ設定
-        # ファイルに書き出す。ログが100KB溜まったらバックアップにして新しいファイルを作る。
-        app_logger = getLogger()
-        app_logger.setLevel(logging.ERROR)
-        rotating_handler = handlers.RotatingFileHandler(
-            # ※注意)プログラム実行ディレクトリのlogs/app.logに出力
-            r'./logs/app.log',
-            mode="a",
-            maxBytes=100 * 1024,
-            backupCount=3,
-            encoding="utf-8"
-        )
-        app_format = logging.Formatter('%(asctime)s : %(levelname)s : %(filename)s - %(message)s')
-        rotating_handler.setFormatter(app_format)
-        app_logger.addHandler(rotating_handler)
-        return app_logger
-    except Exception as e:
-        print(type(e))
-        print(e)
-        return None
+# def get_app_logger():
+#     try:
+#         # 全体のログ設定
+#         # ファイルに書き出す。ログが100KB溜まったらバックアップにして新しいファイルを作る。
+#         app_logger = getLogger()
+#         app_logger.setLevel(logging.ERROR)
+#         rotating_handler = handlers.RotatingFileHandler(
+#             # ※注意)プログラム実行ディレクトリのlogs/app.logに出力
+#             r'./logs/app.log',
+#             mode="a",
+#             maxBytes=100 * 1024,
+#             backupCount=3,
+#             encoding="utf-8"
+#         )
+#         app_format = logging.Formatter('%(asctime)s : %(levelname)s : %(filename)s - %(message)s')
+#         rotating_handler.setFormatter(app_format)
+#         app_logger.addHandler(rotating_handler)
+#         return app_logger
+#     except Exception as e:
+#         print(type(e))
+#         print(e)
+#         return None
 
 
 #
 # with app.app_context_processor() as c:
 #     def without_login():
 #         logger = get_app_logger()
-#         logger.info("ログインしていません")
+#
+#         info("ログインしていません")
 
 
 @app.route("/", methods=['GET'])
