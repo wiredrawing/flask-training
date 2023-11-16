@@ -18,8 +18,9 @@ class Participant(base):
     updated_at = Column(DateTime, nullable=False, comment="更新日時", default=func.now())
 
     # belongs_toの場合 => back_populates で関連付けると動作する
-    # user = relationship("User", back_populates="participants")
-    room = relationship("Room", )
+    user = relationship("User", back_populates="participants")
+    room = relationship("Room", back_populates="participants")
+
 
     # 複数のカラムでユニークキーを設定する場合は、UniqueConstraintを使う
     __table_args__ = (

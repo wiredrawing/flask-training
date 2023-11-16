@@ -4,7 +4,6 @@ from sqlalchemy import Column, Integer, Text, Date, String, DateTime, func
 from sqlalchemy.orm import relationship, backref
 
 from lib.setting import session, base, engine
-from models.Message import Message
 
 
 class Room(base):
@@ -23,7 +22,8 @@ class Room(base):
     deleted_at = Column(DateTime, nullable=True, comment="削除日時", default=func.now())
 
     # メッセージを最新の投稿順に取得する
-    messages = relationship("Message", order_by="Message.id.desc()", backref=backref("room"))
+    messages = relationship("Message", order_by="Message.id.desc()", back_populates="room")
+    participants = relationship("Participant", back_populates="room")
 
 
 if __name__ == "__main__":

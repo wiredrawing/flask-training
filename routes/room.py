@@ -2,6 +2,7 @@ from flask import Flask, Blueprint, render_template, redirect, request
 from flask_login import current_user, login_required
 
 from lib.logger import get_app_logger
+from lib.redis_cli import execute_redis
 from lib.setting import session
 from models.Message import Message
 from models.Participant import Participant
@@ -62,6 +63,8 @@ def index():
     print(current_user.password)
     # 現在稼働中のチャットルーム一覧を表示
     rooms = session.query(Room).all()
+    for room in rooms:
+        print(len(room.participants))
     """現在,作成されているチャットルーム一覧を表示"""
     return render_template("room/index.html", rooms=rooms, user_id=current_user.id)
 
@@ -95,7 +98,11 @@ def room(room_id):
 
 @app.route("/<int:room_id>/message/create/", methods=['POST'])
 def create_message(room_id):
+    """メッセージが送信された場合はDBへ登録後
+       redis-serverへもpulistする
+    """
     try:
+        r = execute_redis()
         required_keys = [
             "user_id",
             "message",
@@ -110,6 +117,8 @@ def create_message(room_id):
             message.user_id = post_data["user_id"]
             session.add(message)
             session.commit()
+            # redis-serverへpublishする
+            r.publish("room_id:{}".format(room_id), message.message);
             return redirect("/room/{}".format(room_id))
     except Exception as e:
         print(e)
@@ -197,3 +206,23 @@ def join_room():
         print(e)
         session.rollback()
         return "指定したルームに参加できませんでした"
+
+
+@app.route("/<int:room_id>/users", methods=['GET'])
+def participant_list(room_id):
+    """指定したRoomIdに参加しているユーザー一覧を返却"""
+    try:
+        participants = session.query(Participant).filter(
+            Participant.room_id == room_id
+        ).all()
+        print(participants)
+        for participant in participants:
+            print(participant.user_id)
+            print(participant.user.id)
+            print(participant.user.username)
+            print(participant.room.room_name)
+            pass
+        return render_template("room/participants.html", participants=participants)
+    except Exception as e:
+        print(e)
+        return ""

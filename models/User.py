@@ -66,11 +66,11 @@ class User(UserMixin, base):
         この場合は
         participant.user でParticipantのUserを取得できる
     """
-    participants = relationship("Participant", backref="user")
+    participants = relationship("Participant", back_populates="user")
 
     # 対象レコードのユーザーが発言したメッセージ一覧を取得する
     # メッセージは最新の投稿順に取得する
-    messages = relationship("Message", order_by="Message.id.desc()", backref="user")
+    messages = relationship("Message", order_by="Message.id.desc()", back_populates="user")
     # id asc順に取得
     # messages = relationship("Message", order_by="Message.id.asc()", backref="user")
 

@@ -33,6 +33,8 @@ class Message(base):
     updated_at = Column(DateTime, nullable=False, comment="更新日時", default=func.now())
     deleted_at = Column(DateTime, nullable=False, comment="削除日時", default=func.now())
 
+    user = relationship("User", order_by="User.id.asc()", back_populates="messages")
+    room = relationship("Room", back_populates="messages")
 
 if __name__ == "__main__":
     # テーブル作成
