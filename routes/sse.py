@@ -41,6 +41,7 @@ def _fetch_message(room_id, current_time, r):
     for item in p.listen():
         if item["type"] == "message":
             message = item["data"].decode("utf-8")
+            # decorded_message = json.loads(message)
             # メッセージをJSON形式に変換する
             data = "data: {}\n\n".format(message)
             yield data

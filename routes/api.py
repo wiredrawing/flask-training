@@ -36,20 +36,37 @@ def create_message(room_id):
         )
         session.add(message)
         session.commit()
+        latest_message_id = message.id
+        message = session.query(Message).filter(Message.id == latest_message_id).first()
+        if message is None:
+            raise Exception("メッセージが登録できませんでした")
 
-        json = dumps(form.data)
-
-        redis_cli.publish("room_id:{}".format(room_id), json)
+        # メッセージをJSON形式に変換する
+        print(dir(message))
+        json_to_redis = {
+            "message": message.message,
+            "room_id": message.room_id,
+            "user_id": message.user_id,
+            "username": message.user.username,
+            "email": message.user.email,
+        }
+        redis_cli.publish("room_id:{}".format(room_id), dumps(json_to_redis))
         # 作成したリソースをJSONで返却する
-        response = make_response(json, 201)
+        response = make_response(json_to_redis, 201)
         response.headers['Content-Type'] = 'application/json; charset=UTF-8'
         return response
     except Exception as e:
+        print(e)
         errors = {
             "message": "エラーが発生しました"
         }
         errorsJson = dumps(errors)
         # 作成したリソースをJSONで返却する
-        response = make_response(errorsJson, 201)
+        response = make_response(errorsJson, 500)
         response.headers['Content-Type'] = 'application/json; charset=UTF-8'
         return response
+
+
+@app.route("/message/<int:room_id>/old/", methods=['POST'])
+def old_messages(room_id):
+    pass
