@@ -1,33 +1,60 @@
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <script>
 
+  $(function () {
+    const eventSource = new EventSource("/sse/messages/{{room.id}}");
+    eventSource.onmessage = function (event) {
+      console.log(event.data)
+      let jsonData = JSON.parse(event.data)
+      console.log(jsonData.message)
+      let prependData = `
+        <div class="message-block">
+          <p>ID: ${jsonData.id}</p>
+          <p>メッセージ: ${jsonData.message}</p>
+
+        </div>
+        `
+      $(prependData).prependTo("#message-wrapper")
+      // const data = JSON.parse(event.data);
+      // console.log(data);
+      // const message = data.message;
+      // const user = data.user;
+      // const messageElement = document.createElement("p");
+      // messageElement.innerHTML = `メッセージ: ${message.message} 発言者: ${user.username}`;
+      // document.body.appendChild(messageElement);
+    }
 
 
-  const eventSource = new EventSource("/sse/messages/{{room.id}}");
-  eventSource.onmessage = function (event) {
-    console.log(event.data)
-    // const data = JSON.parse(event.data);
-    // console.log(data);
-    // const message = data.message;
-    // const user = data.user;
-    // const messageElement = document.createElement("p");
-    // messageElement.innerHTML = `メッセージ: ${message.message} 発言者: ${user.username}`;
-    // document.body.appendChild(messageElement);
-  }
+    $("#send-message").on("click", function () {
+      $.post("/api/message/{{room.id}}/create", {
+        room_id: "{{room.id}}",
+        user_id: "{{user.id}}",
+        message: $("#message").val()
+      });
+    })
+
+  });
+
 </script>
 
-<form action="/room/{{room.id}}/message/create/" method="post">
-  <input type="hidden" name="user_id" value="{{user.id}}">
-  <p>メッセージ</p>
-  <input type="text" name="message">
-  <input type="submit" value="投稿">
+<!-- <form action="/room/{{room.id}}/message/create/" method="post"> -->
+<input type="hidden" name="user_id" value="{{user.id}}">
+<p>メッセージ</p>
+<input type="text" id="message" name="message">
+<input type="button" id="send-message" value="投稿">
 
-</form>
+<!-- </form> -->
 
 
 <h2>Room: {{room.room_name}}に投稿したメッセージ一覧</h2>
 <a target="_blank" href="/sse/messages/{{room.id}}">SSEでメッセージを取得する</a>
 {% for message in messages %}
-  <p>ID: {{message.id}}</p>
-  <p>メッセージ: {{message.message}}</p>
-  <p>発言者: {{message.user.username}}</p>
+<div id="message-wrapper">
+  <div class="message-block">
+    <p>ID: {{message.id}}</p>
+    <p>メッセージ: {{message.message}}</p>
+    <p>発言者: {{message.user.username}}</p>
+  </div>
+</div>
+
 {% endfor %}

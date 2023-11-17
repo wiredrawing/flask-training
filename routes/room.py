@@ -98,8 +98,11 @@ def room(room_id):
 
 @app.route("/<int:room_id>/message/create/", methods=['POST'])
 def create_message(room_id):
-    """メッセージが送信された場合はDBへ登録後
-       redis-serverへもpulistする
+    """
+    メッセージが送信された場合はDBへ登録後
+    redis-serverへもpulistする
+    :param room_id:
+    :return:
     """
     try:
         r = execute_redis()

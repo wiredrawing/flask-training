@@ -39,52 +39,11 @@ def _fetch_message(room_id, current_time, r):
     p.subscribe(redis_key)
 
     for item in p.listen():
-        print("redis-serverからデータを取得")
-        print(item)
         if item["type"] == "message":
             message = item["data"].decode("utf-8")
-            message_obj = {
-                "message": message,
-                "user_id": 0,
-                "username": "redis-server",
-            }
             # メッセージをJSON形式に変換する
-            data = "data: {}\n\n".format(json.dumps(message_obj))
-            print(data)
+            data = "data: {}\n\n".format(message)
             yield data
         else:
             print("redis-serverからデータを取得できませんでした")
             print(item)
-            # break
-    # latest_id = 0
-    # while True:
-    #     # 指定したroom_idのアクセス時点より最新のメッセージを取得する
-    #     if latest_id == 0:
-    #         messages = session.query(Message).filter(
-    #             Message.room_id == room_id,
-    #             Message.created_at >= current_time,
-    #         ).all()
-    #     else:
-    #         messages = session.query(Message).filter(
-    #             Message.room_id == room_id,
-    #             Message.id > latest_id,
-    #         ).all()
-    #     print(messages)
-    #     if len(messages) > 0:
-    #         print("メッセージを取得-------------");
-    #     for message in messages:
-    #         message_obj = {
-    #             "message": message.message,
-    #             "user_id": message.user_id,
-    #             "username": message.user.username,
-    #         }
-    #         # メッセージをJSON形式に変換する
-    #         data = "data: {}\n\n".format(json.dumps(message_obj))
-    #         # data = "data: {}\n\n".format(message.message)
-    #         print(data)
-    #         latest_id = message.id
-    #         yield data
-    #     session.commit()
-    #     print("server sent event ----------------")
-    #     print(current_time)
-    #     sleep(1)

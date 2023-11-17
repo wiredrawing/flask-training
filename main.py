@@ -20,6 +20,7 @@ from routes import register_user, sse
 from routes import login_user
 from routes import dashboard
 from routes import room
+from routes import api
 
 from app import app
 
@@ -31,6 +32,7 @@ app.register_blueprint(login_user.app)
 app.register_blueprint(dashboard.app)
 app.register_blueprint(room.app)
 app.register_blueprint(sse.app)
+app.register_blueprint(api.app)
 
 app.secret_key = "random seckey for flask"
 app.permanent_session_lifetime = timedelta(days=365)
@@ -341,7 +343,7 @@ def add_message():
 # もし非認証だった場合はログインページにリダイレクトする
 @app.before_request
 def hook() -> Response | None:
-    if request.path.find("/sse") != -1:
+    if request.path.find("/sse") != -1 or request.path.find("/api") != -1:
         return None
     # ログインフォーム以外はログイン済みであることを確認する
     if (request.path.find("/login")) != -1 or (request.path.find("/user/register")) != -1:
