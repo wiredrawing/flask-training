@@ -3,6 +3,27 @@
 
   $(function () {
     const eventSource = new EventSource("/sse/messages/{{room.id}}");
+    eventSource.addEventListener("open", function (event) {
+      console.log(event)
+      console.log("接続しました")
+    });
+    eventSource.addEventListener("error", function (event) {
+      console.log(event)
+      console.log("エラーが発生しました")
+    });
+    eventSource.addEventListener("new-message", function (event) {
+      console.log(event.data)
+      let jsonData = JSON.parse(event.data)
+      console.log(jsonData.message)
+      let prependData = `
+        <div class="message-block">
+          <p>ID: ${jsonData.id}</p>
+          <p>メッセージ: ${jsonData.message}</p>
+
+        </div>
+        `
+      $(prependData).prependTo("#message-wrapper")
+    });
     eventSource.onmessage = function (event) {
       console.log(event.data)
       let jsonData = JSON.parse(event.data)
@@ -15,13 +36,6 @@
         </div>
         `
       $(prependData).prependTo("#message-wrapper")
-      // const data = JSON.parse(event.data);
-      // console.log(data);
-      // const message = data.message;
-      // const user = data.user;
-      // const messageElement = document.createElement("p");
-      // messageElement.innerHTML = `メッセージ: ${message.message} 発言者: ${user.username}`;
-      // document.body.appendChild(messageElement);
     }
 
 

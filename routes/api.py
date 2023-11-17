@@ -3,6 +3,7 @@ from json import dumps
 import redis
 from flask import Flask, Blueprint, render_template, redirect, request, jsonify, make_response
 
+from lib.logger import get_app_logger
 from lib.redis_cli import execute_redis
 from lib.setting import session
 from models.Message import Message
@@ -19,6 +20,12 @@ def create_message(room_id):
     :return:
     """
     try:
+        logger = get_app_logger()
+        # リクエストHTTPヘッダーをロギングする
+        headers = request.headers;
+        print(dir(request))
+        print(headers)
+        logger.info(headers)
         """redisクライアントを作成"""
         redis_cli: redis.Redis = execute_redis()
 

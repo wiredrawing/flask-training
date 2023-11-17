@@ -31,7 +31,7 @@ def _fetch_message(room_id, current_time, r):
     メッセージを取得する
     :param room_id: integer
     :param current_time: datetime.datetime
-    :param r: redis.Re
+    :param r: redis.Redis
     :return:
     """
     p = r.pubsub()
@@ -43,7 +43,12 @@ def _fetch_message(room_id, current_time, r):
             message = item["data"].decode("utf-8")
             # decorded_message = json.loads(message)
             # メッセージをJSON形式に変換する
-            data = "data: {}\n\n".format(message)
+            data_list = []
+            data_list.append("event: new-message")
+            data_list.append("data: {}".format(message))
+            data_list.append("retry: 1000")
+            data_list.append("\n")
+            data = "\n".join(data_list)
             yield data
         else:
             print("redis-serverからデータを取得できませんでした")
