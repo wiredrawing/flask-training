@@ -20,12 +20,12 @@ def create_message(room_id):
     :return:
     """
     try:
-        logger = get_app_logger()
+        # logger = get_app_logger()
         # リクエストHTTPヘッダーをロギングする
         headers = request.headers;
         print(dir(request))
         print(headers)
-        logger.info(headers)
+        # logger.info(headers)
         """redisクライアントを作成"""
         redis_cli: redis.Redis = execute_redis()
 
@@ -44,6 +44,7 @@ def create_message(room_id):
         session.add(message)
         session.commit()
         latest_message_id = message.id
+
         message = session.query(Message).filter(Message.id == latest_message_id).first()
         if message is None:
             raise Exception("メッセージが登録できませんでした")
@@ -51,8 +52,10 @@ def create_message(room_id):
         # メッセージをJSON形式に変換する
         print(dir(message))
         json_to_redis = {
+            "id": message.id,
             "message": message.message,
             "room_id": message.room_id,
+            "room_name": message.room.room_name,
             "user_id": message.user_id,
             "username": message.user.username,
             "email": message.user.email,

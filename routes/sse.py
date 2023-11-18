@@ -43,11 +43,11 @@ def _fetch_message(room_id, current_time, r):
             message = item["data"].decode("utf-8")
             # decorded_message = json.loads(message)
             # メッセージをJSON形式に変換する
-            data_list = []
-            data_list.append("event: new-message")
-            data_list.append("data: {}".format(message))
-            data_list.append("retry: 1000")
-            data_list.append("\n")
+            data_list = [
+                "event: new-message",
+                "data: {}".format(message),
+                "retry: 1000",
+                "\n"]
             data = "\n".join(data_list)
             yield data
         else:
