@@ -90,8 +90,8 @@ def room(room_id):
     print("current_user.id ===> {}".format(current_user.id))
 
     room = session.query(Room).filter(Room.id == room_id).first()
-    print(room.messages)
-    print(dir(room))
+    # print(room.messages)
+    # print(dir(room))
     """指定されたチャットルームに紐づくメッセージを表示"""
     return render_template("room/room.html", room=room, user=current_user, messages=room.messages)
 

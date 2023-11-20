@@ -43,20 +43,6 @@ class Middleware:
         self.app = app
 
     def __call__(self, environ, start_response):
-        # print(encode_cookie("あああ", app.secret_key))
-        # print(decode_cookie(encode_cookie("あああ", app.secret_key), app.secret_key))
-        # print(dir(environ))
-        # print(environ.keys())
-        # print(environ["HTTP_COOKIE"])
-        # print(decode_cookie(environ["HTTP_COOKIE"], "random seckey for flask"))
-        # print("------------------------")
-        # print(current_user)
-        # print(start_response)
-        #
-        # for key, value in start_response:
-        #     print(value);
-        #     print(key)
-        # print("------------------------")
         return self.app(environ, start_response)
 
 
@@ -121,132 +107,6 @@ def post_method():
     return response
 
 
-# # server sent eventを動作させる場合は以下のように実装する
-# @app.route("/api/v1/users", methods=['GET'])
-# def api_users():
-#     def sse_response():
-#         for value in range(1000):
-#             yield f"data: 現在の値 => {value}\n\n"
-#             time.sleep(1)
-#         pass
-# 
-#     response = make_response(sse_response())
-#     response.headers["Content-Type"] = "text/event-stream; charset=UTF-8"
-#     return response
-
-
-# @app.route("/add/somedata/to/db", methods=['GET'])
-# def add_somedata_to_db():
-#     # 何かしらユーザーデータを登録する
-#     user = User();
-#     user.username = "testuser"
-#     user.gender = 1;
-#     session.add(user)
-#     session.commit()
-# 
-#     def inner():
-#         # 新規データを登録後,全レコードを取得する
-#         users = session.query(User).all()
-#         for user in users:
-#             yield f"data: {user.username}\n\n"
-#             time.sleep(1)
-#         pass
-# 
-#     inner_variable = inner
-# 
-#     # トランザクションを使用した場合
-#     try:
-#         session.begin()
-#         transaction_user = User()
-#         transaction_user.username = "transaction_user"
-#         transaction_user.gender = 2
-#         session.add(transaction_user)
-#         session.commit()
-#     except Exception as e:
-#         print(e)
-#         session.rollback()
-#     # server sent eventでレコードを垂れ流してみる
-#     response = make_response(inner_variable())
-#     response.headers["Content-Type"] = "text/event-stream; charset=UTF-8"
-#     return response
-
-
-# # scoped_sessionを使わない場合
-# @app.route("/just/in/time/add", methods=['GET'])
-# def just_in_time_add():
-#     session = Session(engine)
-#     try:
-#         session.begin();
-#         room = Room();
-#         room.room_name = "★ここは40代男性のみのルームです";
-#         room.description = "★40代男性のみのルームです";
-#         session.add(room)
-#         session.commit();
-#     except Exception as e:
-#         session.rollback();
-#
-#     rooms = session.query(Room).all()
-#
-#     def inner():
-#         for room in rooms:
-#             yield f"data: {room.room_name}\n\n"
-#             time.sleep(1)
-#         pass
-#
-#     response = make_response(inner());
-#     response.headers["Content-Type"] = "text/event-stream; charset=UTF-8"
-#     return response
-
-
-# @app.route("/login", methods=['GET'])
-# def login():
-#     print("チャットルームに対する参加者を取得する")
-#     participants = session.query(Participant).filter(Participant.id == 1).first()
-#     if participants:
-#         print("participantsテーブルに該当レコードが存在します")
-#         print(participants);
-#         print(participants.user.id)
-#         print(participants.user.email)
-#         print(participants.user.password)
-#         print(participants.user.username)
-#         pass
-#     else:
-#         print("participantsテーブルに該当レコードが存在しません")
-#         pass
-# 
-#     print("Userモデルからみた関係");
-#     user = session.query(User).filter(User.id == 2).first()
-#     if user:
-#         print(user)
-#         print(user.participants)
-#         for p in user.participants:
-#             print(participants.id)
-#             print(participants.room_id)
-#             print(participants.user_id)
-#     response = make_response(render_template("login/login.html"))
-#     return response
-# 
-# 
-# @app.route("/login/authorize", methods=['POST'])
-# def authorize():
-#     # formから入力されたアカウント情報を取得
-#     request_data = request.form
-#     body = request_data.to_dict()
-#     user = session.query(User).filter(User.email == body["email"]).first()
-# 
-#     # emailが存在する場合,パスワードを検証する
-#     if user is not None:
-#         # バイト列として取得
-#         hashed_password = user.password.encode("utf-8")
-#         if bcrypt.checkpw(body["password"].encode("utf-8"), hashed_password):
-#             # パスワードが一致した場合セッションにユーザー情報を格納する
-#             http_session.permanent = True
-#             http_session["user_id"] = user.id
-#             return "パスワードが一致しました"
-# 
-#     return "パスワードが一致しません"
-
-
 @app.route("/message/add", methods=['GET'])
 def add_message_form():
     user_id = http_session.get("user_id");
@@ -285,60 +145,6 @@ def add_message():
     return "メッセージを登録しました"
 
 
-# # 指定された引数のルームIDに紐づくメッセージを取得する
-# @app.route("/room/<int:room_id>/", methods=['GET'])
-# def room(room_id):
-#     print("room_id = {}".format(room_id))
-#     # 選択したチャットルーム情報を取得
-#     room = session.query(Room).filter(Room.id == room_id).first()
-#
-#     # 選択したチャットルームに紐づく全メッセージを最新順に取得
-#     messages = session.query(Message).filter(Message.room_id == room_id).order_by(Message.id.desc()).all()
-#     for message in messages:
-#         print(message.message)
-#         print(message.room.room_name);
-#
-#     return render_template("room/room.html", room=room, messages=messages)
-#
-#
-# @app.route("/room/", methods=['GET'])
-# def rooms():
-#     """
-#     現在,DB上に登録されているチャットルーム一覧を取得する
-#     :return:
-#     """
-#     rooms: object = session.query(Room).all()
-#     response = make_response(render_template("room/list.html", rooms=rooms))
-#     return response
-
-
-# @app.route("/room/add/", methods=['GET'])
-# def room_form():
-#     """
-#     チャットルームを追加する
-#     :return:
-#     """
-#     return render_template("room/add_room.html")
-#
-#
-# @app.route("/room/add/", methods=['POST'])
-# def add_post():
-#     request_data = request.form
-#     if len(request_data["room_name"]) == 0 and len(request_data["description"]) == 0:
-#         return "Room名および概要説明は必須項目です"
-#     try:
-#         room = Room();
-#         room.room_name = request_data["room_name"]
-#         room.description = request_data["description"]
-#         session.add(room)
-#         session.commit()
-#     except Exception as e:
-#         session.rollback()
-#         print(e)
-#
-#     return "ルームを追加しました"
-
-
 # 指定したルーティング以外は認証を必須とする
 # もし非認証だった場合はログインページにリダイレクトする
 @app.before_request
@@ -354,21 +160,6 @@ def hook() -> Response | None:
         return redirect("/login")
     else:
         pass
-        # 認証済みであればOK
-        # print("----------------------------------")
-        # print(request.path)
-        # print(request.url)
-        # print("すでにログイン済みです")
-        # print("=============================")
-        # print(dir(request))
-        # print('endpoint: %s, url: %s, path: %s' % (
-        #     request.endpoint,
-        #     request.url,
-        #     request.path))
-        # print(request.environ)
-        # print(current_user.id)
-        # print("=============================")
-        # print(request)
     return None
 
 

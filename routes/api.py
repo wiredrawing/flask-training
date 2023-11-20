@@ -1,12 +1,16 @@
+from abc import ABC
 from json import dumps
 
 import redis
 from flask import Flask, Blueprint, render_template, redirect, request, jsonify, make_response
+from injector import inject, Injector
 
+from interfaces.MessageFormatterInterface import MessageFormatterInterface
 from lib.logger import get_app_logger
 from lib.redis_cli import execute_redis
 from lib.setting import session
 from models.Message import Message
+from repositories.MessageFormatter import MessageFormatter
 from routes.CreateMessageForm import CreateMessageForm
 
 app = Blueprint('api', __name__, url_prefix='/api')
@@ -48,18 +52,12 @@ def create_message(room_id):
         message = session.query(Message).filter(Message.id == latest_message_id).first()
         if message is None:
             raise Exception("メッセージが登録できませんでした")
+        print("********************", vars(message), "##########################")
 
-        # メッセージをJSON形式に変換する
-        print(dir(message))
-        json_to_redis = {
-            "id": message.id,
-            "message": message.message,
-            "room_id": message.room_id,
-            "room_name": message.room.room_name,
-            "user_id": message.user_id,
-            "username": message.user.username,
-            "email": message.user.email,
-        }
+        # メッセージを規程のJSON形式に変換させるためにDIコンテナを利用する
+        # MessageFormatterはServer Sent Eventのコントローラ側でも利用する
+        message_formatter = MessageFormatter(message)
+        json_to_redis = message_formatter.to_dict()
         redis_cli.publish("room_id:{}".format(room_id), dumps(json_to_redis))
         # 作成したリソースをJSONで返却する
         response = make_response(json_to_redis, 201)
