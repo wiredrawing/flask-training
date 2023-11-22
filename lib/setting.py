@@ -23,10 +23,8 @@ try:
 
     # モデルクラスの基底クラスを作成
     base = declarative_base()
-
     session_factory = sessionmaker(engine)
     session = scoped_session(session_factory)
-    session.autocommit = None
 except Exception as e:
     get_app_logger().error(e)
     # print(e);

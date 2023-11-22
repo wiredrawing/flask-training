@@ -57,8 +57,6 @@ def create_message(room_id):
             raise Exception("現在のコネクション数が多すぎます。しばらく時間をおいてから再度お試しください。")
         for row in all_connections:
             print(row)
-        # 手動トランザクションで実行
-        session.autocommit = False
         try:
             message = Message(
                 message=form.data.get("message"),
