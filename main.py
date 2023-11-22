@@ -65,12 +65,11 @@ app.wsgi_app = Middleware(app.wsgi_app)
 # TOPページ
 @app.route('/')
 def hello():
-    logger = get_app_logger()
-    logger.error("TOPページへアクセス中 --------------------------------->")
     # DB接続のテスト
     messages = session.query(Message.message).all()
     for message in messages:
-        print(message)
+        pass
+        # print(message)
 
     user = session.query(User).filter(User.id == current_user.id).first()
     if user is None:
@@ -83,7 +82,7 @@ def hello():
         "current_user": current_user,
         "user": user,
     }
-    print(user.messages)
+    # print(user.messages)
     return render_template("index.html", **params)
 
 
@@ -129,7 +128,7 @@ def add_message():
         # メッセージは必須とする
         if len(body["message"]) == 0:
             return "メッセージを入力してください"
-        print(body)
+        # print(body)
         # メッセージを登録
         message = Message()
         message.message = body["message"]
@@ -139,7 +138,8 @@ def add_message():
         session.commit()
     except Exception as e:
         session.rollback();
-        print(e);
+        get_app_logger().error(e)
+        # print(e);
         return "メッセージの送信に失敗しました"
 
     return "メッセージを登録しました"

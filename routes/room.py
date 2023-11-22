@@ -124,7 +124,8 @@ def create_message(room_id):
             r.publish("room_id:{}".format(room_id), message.message);
             return redirect("/room/{}".format(room_id))
     except Exception as e:
-        print(e)
+        get_app_logger().error(e)
+        # print(e)
 
     return ""
 
@@ -166,7 +167,8 @@ def add_post():
         session.commit()
     except Exception as e:
         session.rollback()
-        print(e)
+        get_app_logger().error(e)
+        # print(e)
 
     # 新規ルームを作成したら
     # 既存ルーム一覧にリダイレクト
@@ -181,13 +183,14 @@ def join_room():
         form = CreateParticipantForm(request.form)
 
         if form.validate() is not True:
-            print(form.errors)
-            return ""
+            get_app_logger().error(form.errors)
+            # print(form.errors)
+            # return ""
             return redirect("/room/")
         # end
 
-        print(form);
-        print("================>????????????")
+        # print(form);
+        # print("================>????????????")
         # バリデーションをパスした場合
         exists_participant = session.query(Participant).filter(
             Participant.room_id == form.room_id.data,
@@ -202,11 +205,18 @@ def join_room():
         participant = Participant()
         participant.room_id = form.room_id.data
         participant.user_id = form.user_id.data
-        session.add(participant)
-        session.commit()
+        try:
+
+            # session.begin()
+            session.add(participant)
+            # raise Exception("transaction test")
+            session.commit()
+        except Exception as e:
+            print(e);
         return "指定したルームに参加しました"
     except Exception as e:
-        print(e)
+        get_app_logger().error(e)
+        # print(e)
         session.rollback()
         return "指定したルームに参加できませんでした"
 
@@ -218,14 +228,15 @@ def participant_list(room_id):
         participants = session.query(Participant).filter(
             Participant.room_id == room_id
         ).all()
-        print(participants)
+        # print(participants)
         for participant in participants:
-            print(participant.user_id)
-            print(participant.user.id)
-            print(participant.user.username)
-            print(participant.room.room_name)
+            # print(participant.user_id)
+            # print(participant.user.id)
+            # print(participant.user.username)
+            # print(participant.room.room_name)
             pass
         return render_template("room/participants.html", participants=participants)
     except Exception as e:
-        print(e)
+        get_app_logger().error(e)
+        # print(e)
         return ""

@@ -19,7 +19,9 @@
         <div class="message-block">
           <p>ID: ${jsonData.id}</p>
           <p>メッセージ: ${jsonData.message}</p>
-          <p>発言者: ${jsonData.username}</p>
+          <p>発言者: ${jsonData.user.username}</p>
+          <p>発言者ID: ${jsonData.user.id}</p>
+          <p>発言者email: ${jsonData.user.email}</p>
         </div>
         `
       $(prependData).prependTo("#message-wrapper")

@@ -13,16 +13,18 @@ def dashboard():
     user = session.query(User).filter(User.id == user_id).first()
     # 参加しているチャットルーム一覧
     for message in user.messages:
-        print(message)
-        print(message.id)
-        print(message.message)
+        pass
+        # print(message)
+        # print(message.id)
+        # print(message.message)
 
     for participant in user.participants:
-        print(participant.room_id)
-        print(participant.room);
-        print(participant.user)
-        print(participant.room.room_name)
-        print(participant.user.username);
+        pass
+        # print(participant.room_id)
+        # print(participant.room);
+        # print(participant.user)
+        # print(participant.room.room_name)
+        # print(participant.user.username);
     return render_template("dashboard/dashboard.html", user=user)
 
 
