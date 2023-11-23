@@ -74,6 +74,8 @@ class User(UserMixin, base):
     # id asc順に取得
     # messages = relationship("Message", order_by="Message.id.asc()", backref="user")
 
+    message_likes = relationship("MessageLike", back_populates="user")
+
 
 # Do hash password.
 def set_password(self, password):
@@ -91,7 +93,7 @@ if __name__ == "__main__":
     >> alembic revision --autogenerate -m "create tables"
     とりあえずDBの中身が消えて良いならマイグレーション履歴を呼び出す
     >> alembic history 
-    >> alembic upgrade base でマイグレーションを実行する
+    >> alembic upgrade head でマイグレーションを実行する
     >> alembic downgrade base で初期状態へもどす
     """
     base.metadata.create_all(engine)

@@ -29,6 +29,7 @@ from models.User import User
 from models.Room import Room
 from models.Participant import Participant
 from models.Message import Message
+from models.MessageLike import  MessageLike
 target_metadata = base.metadata
 
 

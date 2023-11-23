@@ -35,6 +35,7 @@ class Message(base):
 
     user = relationship("User", order_by="User.id.asc()", back_populates="messages")
     room = relationship("Room", back_populates="messages")
+    message_likes = relationship("MessageLike", back_populates="message")
 
 if __name__ == "__main__":
     # テーブル作成
