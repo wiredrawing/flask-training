@@ -8,6 +8,16 @@
 
 <h3>現在参加しているチャットルーム</h3>
 {% for participant in user.participants %}
-  <p><a href="/room/{{participant.room.id}}">{{participant.room.room_name}}</a></p>
+<p><a href="/room/{{participant.room.id}}">{{participant.room.room_name}}</a></p>
 {% endfor %}
+
+<h3>現在投稿済みメッセージ一覧</h3>
+{% for message in user.messages %}
+<div>
+  <p>投稿済みメッセージ: {{message.message}}</p>
+  <p>ルーム名: {{message.room.room_name}}</p>
+</div>
+<hr>
+{% endfor %}
+
 {% endblock %}

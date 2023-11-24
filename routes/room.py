@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import Flask, Blueprint, render_template, redirect, request
 from flask_login import current_user, login_required
 
@@ -71,6 +73,9 @@ def index():
 
 @app.route("/<int:room_id>", methods=['GET'])
 def room(room_id):
+
+    get_app_logger(__name__).info("{}: ルームにアクセスしました".format(datetime.now()))
+
     if current_user.is_authenticated is not True:
         return redirect("/login")
 
@@ -90,7 +95,12 @@ def room(room_id):
     print("current_user.id ===> {}".format(current_user.id))
 
     room = session.query(Room).filter(Room.id == room_id).first()
-    # print(room.messages)
+    for message in room.messages:
+        print(message.message)
+        print(type(message.message_likes))
+        print(len(message.message_likes))
+
+    get_app_logger(__name__).info("{}: ルームにアクセスが完了しました".format(datetime.now()))
     # print(dir(room))
     """指定されたチャットルームに紐づくメッセージを表示"""
     return render_template("room/room.html", room=room, user=current_user, messages=room.messages)

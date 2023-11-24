@@ -7,6 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from lib.setting import engine, base, session
 from models.Participant import Participant
+from models.MessageLike import  MessageLike
 from app import login
 
 

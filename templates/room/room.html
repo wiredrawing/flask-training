@@ -26,19 +26,6 @@
         `
       $(prependData).prependTo("#message-wrapper")
     });
-    eventSource.onmessage = function (event) {
-      console.log(event.data)
-      let jsonData = JSON.parse(event.data)
-      console.log(jsonData.message)
-      let prependData = `
-        <div class="message-block">
-          <p>ID: ${jsonData.id}</p>
-          <p>メッセージ: ${jsonData.message}</p>
-          <p>発言者: ${jsonData.username}</p>
-        </div>
-        `
-      $(prependData).prependTo("#message-wrapper")
-    }
 
 
     $("#send-message").on("click", function () {
@@ -70,6 +57,13 @@
     <p>ID: {{message.id}}</p>
     <p>メッセージ: {{message.message}}</p>
     <p>発言者: {{message.user.username}}</p>
+    <p>いいね数: {{ message.message_likes | length }}</p>
+    <!-- 当該メッセージにいいねをする -->
+    <form action="/message/{{message.id}}/like" method="post">
+      <input type="hidden" name="user_id" value="{{user.id}}">
+      <input type="hidden" name="message_id" value="{{message.id}}">
+      <input type="submit" value="いいね!">
+    </form>
   </div>
 </div>
 

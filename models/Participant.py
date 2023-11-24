@@ -21,7 +21,6 @@ class Participant(base):
     user = relationship("User", back_populates="participants")
     room = relationship("Room", back_populates="participants")
 
-
     # 複数のカラムでユニークキーを設定する場合は、UniqueConstraintを使う
     __table_args__ = (
         (UniqueConstraint('room_id', 'user_id', name='unique_room_id_user_id')),
@@ -29,6 +28,7 @@ class Participant(base):
             'mysql_collate': 'utf8_general_ci',
             "comment": "参加者モデル",
         })
+
 
 if __name__ == "__main__":
     base.metadata.create_all(engine)
