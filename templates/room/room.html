@@ -1,4 +1,5 @@
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
 <script>
 
   $(function () {
@@ -36,6 +37,24 @@
       });
     })
 
+    $(".button-to-like").each(function (index) {
+      // いいね対象のメッセージIDを取得
+      let messageId = $(".message_id").eq(index).val()
+      console.log(messageId);
+      let userId = $(".user_id").eq(index).val()
+      console.log(userId);
+      $(".button-to-like").eq(index).on("click", function () {
+        axios.post("/api/message/" + messageId + "/like", {
+          message_id: messageId,
+          user_id: userId,
+        }).then(function (data) {
+          console.log(data)
+        }).catch(function (error) {
+          console.log(error)
+        })
+      });
+    });
+
   });
 
 </script>
@@ -60,10 +79,11 @@
     <p>いいね数: {{ message.message_likes | length }}</p>
     <!-- 当該メッセージにいいねをする -->
     <form action="/message/{{message.id}}/like" method="post">
-      <input type="hidden" name="user_id" value="{{user.id}}">
-      <input type="hidden" name="message_id" value="{{message.id}}">
-      <input type="submit" value="いいね!">
+      <input type="hidden" class="user_id" name="user_id" value="{{user.id}}">
+      <input type="hidden" class="message_id" name="message_id" value="{{message.id}}">
     </form>
+    <p>このコメントにいいね!</p>
+    <input type="button" class="button-to-like" name="button-to-like" value="いいね!">
   </div>
 </div>
 

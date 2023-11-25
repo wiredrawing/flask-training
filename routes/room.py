@@ -52,17 +52,17 @@ app = Blueprint('room', __name__, url_prefix='/room')
 # @login_required(without_login)
 def index():
     """ログイン状態を必須とする"""
-    logger = get_app_logger()
+    logger = get_app_logger(__name__)
     # logger = getLogger(__name__)
     logger.debug("ロギング処理を関数化して対応");
     logger.error("ロギング処理を関数化して対応")
-    print(logger)
+    # print(logger)
     # # ログインしていない場合はログインページにリダイレクト
     # # 要ログイン
     # if current_user.is_authenticated is not True:
     #     return redirect("/login")
     # # end
-    print(current_user.password)
+    # print(current_user.password)
     # 現在稼働中のチャットルーム一覧を表示
     rooms = session.query(Room).all()
     for room in rooms:

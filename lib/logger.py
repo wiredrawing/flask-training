@@ -5,7 +5,7 @@ from logging import getLogger, handlers, DEBUG, FileHandler, StreamHandler, INFO
 def get_app_logger(logger_name: str):
     try:
         # ファイルに書き出す。ログが100KB溜まったらバックアップにして新しいファイルを作る。
-        app_logger = getLogger(logger_name)
+        app_logger = getLogger()
         # ロガー自体にログレベルを設定しておく
         app_logger.setLevel(DEBUG)
 
@@ -15,7 +15,7 @@ def get_app_logger(logger_name: str):
         # ファイルに書き出す。ログが100KB溜まったらバックアップにして新しいファイルを作る。
         rotating_handler = handlers.RotatingFileHandler(
             # ※注意)プログラム実行ディレクトリのlogs/app.logに出力
-            r'./logs/app.log.{}'.format(today),
+            r'./logs/{}.app.log.{}'.format(logger_name, today),
             mode="a",
             maxBytes=500 * 1024 * 1024 * 1024,
             backupCount=10,
@@ -28,8 +28,10 @@ def get_app_logger(logger_name: str):
         stream_handler = StreamHandler();
         stream_handler.setLevel(DEBUG)
         stream_handler.setFormatter(Formatter('%(asctime)s : %(levelname)s : %(filename)s - %(message)s'));
-        app_logger.addHandler(rotating_handler)
-        app_logger.addHandler(stream_handler)
+
+        if app_logger.hasHandlers() is False:
+            app_logger.addHandler(rotating_handler)
+            app_logger.addHandler(stream_handler)
         return app_logger
     except Exception as e:
         print(e)

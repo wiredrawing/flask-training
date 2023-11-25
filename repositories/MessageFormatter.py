@@ -10,12 +10,9 @@ class MessageFormatter(MessageFormatterInterface):
     MessageFormatter is a class that formats messages for the user.
     """
     def __init__(self, message: Message):
-        print("===================>", message)
         self.__message = message
 
     def to_dict(self):
-        print(self.__message)
-        print(self.__message.user)
         if self.__message.user is not None and self.__message.room is not None:
             return {
                 "id": self.__message.id,

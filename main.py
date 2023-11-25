@@ -21,7 +21,7 @@ from routes import login_user
 from routes import dashboard
 from routes import room
 from routes import api
-
+from routes.admin.index import app as admin
 from app import app
 
 # app = Flask(__name__, template_folder="templates")
@@ -34,6 +34,7 @@ app.register_blueprint(room.app)
 app.register_blueprint(sse.app)
 app.register_blueprint(api.app)
 app.register_blueprint(message_like.app)
+app.register_blueprint(admin)
 app.secret_key = "random seckey for flask"
 app.permanent_session_lifetime = timedelta(days=365)
 

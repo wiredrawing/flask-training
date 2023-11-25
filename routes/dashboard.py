@@ -2,6 +2,7 @@ from flask import Flask, Blueprint, session as http_session, render_template, re
 from flask_login import current_user, logout_user
 
 from lib.setting import session, engine
+from models.Message import Message
 from models.User import User
 
 app = Blueprint('dashboard', __name__, url_prefix='/dashboard')
@@ -13,6 +14,9 @@ def dashboard():
     user = session.query(User).filter(User.id == user_id).first()
     # 参加しているチャットルーム一覧
     for message in user.messages:
+        # print(message.user);
+        # print(type(Message.user))
+        # print(Message.user.id)
         pass
         # print(message)
         # print(message.id)
