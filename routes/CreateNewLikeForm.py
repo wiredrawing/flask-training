@@ -1,29 +1,20 @@
-from wtforms import Form, StringField, validators, ValidationError, IntegerField
+# from wtforms import Form, StringField, validators, ValidationError, IntegerField
 
 from lib.setting import session
-from models.User import User
-from models.Room import Room
-from validators.CheckMessageId import check_message_id
-from validators.CheckUserId import check_user_id
-from marshmallow import Schema, fields, pprint
+from models.Message import Message
+from marshmallow import Schema, fields, pprint, ValidationError
+
+def check_message_id(message_id):
+    """
+    メッセージIDが存在するかチェックする
+    :param message_id:
+    :return:
+    """
+    message = session.query(Message).filter(Message.id == message_id).first()
+    if message is None:
+        raise ValidationError("Could not find the message id that you specified.")
 
 
 class CreateNewLikeForm(Schema):
-    message_id = fields.Integer(required=True)
+    message_id = fields.Integer(required=True, validate=check_message_id)
     user_id = fields.Integer(required=True)
-
-
-
-# class CreateNewLikeForm(Form):
-#     """
-#     いいねの作成フォーム
-#     """
-#     user_id = IntegerField("ユーザーID", [
-#         validators.DataRequired(message="ユーザーIDは必須項目です"),
-#         check_user_id(session=session, message="指定されたユーザーIDは存在しません")
-#     ]);
-#
-#     message_id = IntegerField("メッセージID", [
-#         validators.DataRequired(message="メッセージIDは必須項目です"),
-#         check_message_id(session=session, message="指定されたメッセージIDは存在しません")
-#     ]);

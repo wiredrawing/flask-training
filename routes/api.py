@@ -138,33 +138,6 @@ def like(message_id):
         "likes": max_likes
     }
     return jsonify(result)
-    # print(schema.validate(request.json))
-    # validated = schema.load(request.json)
-    # print(schema.validate());
-    # print(dir(schema))
-    # print(validated);
-    # form = CreateNewLikeForm.from_json(request.json)
-    # # form = CreateNewLikeForm(request.json)
-
-    # # print(form.data)
-    # # バリデーションの実行
-    # if not form.validate():
-    #     errors = form.errors
-    #     return jsonify(errors)
-    # try:
-    #     validated_data = form.data
-    #     message_like = MessageLike(user_id=validated_data["user_id"], message_id=message_id)
-    #     session.add(message_like)
-    #     session.commit()
-    #
-    #     # 現在の<いいね>件数を取得
-    #     max_likes = session.query(MessageLike).filter(MessageLike.message_id == message_id).count()
-    #     print(max_likes)
-    # except Exception as e:
-    #     session.rollback()
-    #     get_app_logger(__name__).error(e)
-    #     raise Exception("いいねの登録に失敗しました")
-
 
 @app.route("/message/<int:room_id>/old/", methods=['POST'])
 def old_messages(room_id):
