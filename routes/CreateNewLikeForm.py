@@ -4,6 +4,7 @@ from lib.setting import session
 from models.Message import Message
 from marshmallow import Schema, fields, pprint, ValidationError
 
+
 def check_message_id(message_id):
     """
     メッセージIDが存在するかチェックする

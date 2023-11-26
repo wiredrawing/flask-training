@@ -30,11 +30,18 @@
 
 
     $("#send-message").on("click", function () {
-      $.post("/api/message/{{room.id}}/create", {
-        room_id: "{{room.id}}",
-        user_id: "{{user.id}}",
-        message: $("#message").val()
-      });
+      let roomId = $("#room_id").val()
+      let userId = $("#user_id").val()
+      let message = $("#message").val()
+      axios.post("/api/message/{{room.id}}/create", {
+        room_id: roomId,
+        user_id: userId,
+        message: message,
+      }).then(function (data) {
+        console.log(data)
+      }).catch(function (error) {
+        console.log(error)
+      })
     })
 
     $(".button-to-like").each(function (index) {
@@ -70,6 +77,11 @@
 
 <h2>Room: {{room.room_name}}に投稿したメッセージ一覧</h2>
 <a target="_blank" href="/sse/messages/{{room.id}}">SSEでメッセージを取得する</a>
+
+<!-- room_id -->
+<input type="hidden" id="room_id" name="room_id" value="{{room.id}}">
+<!-- user_id -->
+<input type="hidden" id="user_id" name="user_id" value="{{user.id}}">
 {% for message in messages %}
 <div id="message-wrapper">
   <div class="message-block">

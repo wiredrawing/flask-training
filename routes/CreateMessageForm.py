@@ -1,50 +1,54 @@
-from wtforms import Form, StringField, validators, ValidationError, IntegerField
-
+from marshmallow import Schema, fields, pprint, ValidationError
 from lib.setting import session
 from models.Room import Room
 from models.User import User
 
 
-def check_room_id(form, field):
+def check_room_id(room_id):
     room = session.query(Room).filter(
-        Room.id == field.data,
+        Room.id == room_id,
     ).first()
     if room is None:
         raise ValidationError("指定されたルームIDは存在しません")
-    else:
-        return None
+    return True
 
 
-def check_user_id(form, field):
+def check_user_id(user_id):
     """
-    フォームから投稿されたユーザーIDが存在するかチェックする
-    :param form:
-    :param field:
+    ユーザーIDが存在するかチェックする
+    :param user_id:
     :return:
     """
     user = session.query(User).filter(
-        User.id == field.data,
+        User.id == user_id,
     ).first()
     if user is None:
         raise ValidationError("指定されたユーザーIDは存在しません")
-    else:
-        return None
+    return True
 
 
-class CreateMessageForm(Form):
+class CreateMessageForm(Schema):
     """
     メッセージの作成フォーム
     """
-    message = StringField("メッセージ", [
-        validators.DataRequired(message="メッセージは必須項目です")
-    ], default="")
+    message = fields.String(required=True)
+    room_id = fields.Integer(required=True, validate=check_room_id)
+    user_id = fields.Integer(required=True, validate=check_user_id)
 
-    room_id = IntegerField("ルームID", [
-        validators.DataRequired(message="ルームIDは必須項目です"),
-        check_room_id
-    ]);
-
-    user_id = IntegerField("ユーザーID", [
-        validators.DataRequired(message="ユーザーIDは必須項目です"),
-        check_user_id
-    ]);
+# class CreateMessageForm(Form):
+#     """
+#     メッセージの作成フォーム
+#     """
+#     message = StringField("メッセージ", [
+#         validators.DataRequired(message="メッセージは必須項目です")
+#     ], default="")
+#
+#     room_id = IntegerField("ルームID", [
+#         validators.DataRequired(message="ルームIDは必須項目です"),
+#         check_room_id
+#     ]);
+#
+#     user_id = IntegerField("ユーザーID", [
+#         validators.DataRequired(message="ユーザーIDは必須項目です"),
+#         check_user_id
+#     ]);

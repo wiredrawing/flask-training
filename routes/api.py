@@ -22,24 +22,19 @@ def create_message(room_id):
     :return:
     """
     try:
-        # logger = get_app_logger()
-        # リクエストHTTPヘッダーをロギングする
-        headers = request.headers
-        print(type(headers))
-        print(dir(headers))
-        for header in headers:
-            print(header)
-        # print(headers)
-        # logger.info(headers)
         """redisクライアントを作成"""
         redis_cli: redis.Redis = execute_redis()
 
         """postデータを変数化"""
-        form = CreateMessageForm(request.form)
-        if form.validate() is not True:
-            errors = form.errors
-            # errors will return.
-            return jsonify(errors)
+        scheme = CreateMessageForm()
+        error_messages: dict = scheme.validate(request.json)
+
+        # エラーメッセージが空っぽでない場合はエラーを返却する
+        if error_messages != {}:
+            return jsonify(error_messages)
+
+        # バリデーション成功時
+        validated_data = scheme.load(request.json)
 
         # 現在のコネクション数を取得する
         sql = """
@@ -61,9 +56,9 @@ def create_message(room_id):
         try:
             # session.begin(subtransactions=True)
             message = Message(
-                message=form.data.get("message"),
-                room_id=form.data.get("room_id"),
-                user_id=form.data.get("user_id"),
+                message=validated_data["message"],
+                room_id=validated_data["room_id"],
+                user_id=validated_data["user_id"],
             )
             session.add(message)
             session.commit()
@@ -130,7 +125,7 @@ def like(message_id):
         session.add(message_like)
         session.commit()
         get_app_logger(__name__).info("いいねを登録しました")
-    else :
+    else:
         get_app_logger(__name__).info("既にいいねしています")
 
     max_likes = session.query(MessageLike).filter(MessageLike.message_id == validated_data["message_id"]).count()
@@ -138,6 +133,7 @@ def like(message_id):
         "likes": max_likes
     }
     return jsonify(result)
+
 
 @app.route("/message/<int:room_id>/old/", methods=['POST'])
 def old_messages(room_id):
