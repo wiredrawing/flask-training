@@ -27,11 +27,23 @@ def check_user_id(user_id):
     return True
 
 
+def check_ng_message(message):
+    if message == "NG":
+        raise ValidationError("NGワードが含まれています")
+    return True
+
+
+def check_message_length(message: str):
+    if not len(message) > 0:
+        raise ValidationError("メッセージの入力は必須項目です。")
+    return True
+
+
 class CreateMessageForm(Schema):
     """
     メッセージの作成フォーム
     """
-    message = fields.String(required=True)
+    message = fields.String(required=True, validate=(check_ng_message,check_message_length), error_messages={"required": "メッセージは必須項目です"})
     room_id = fields.Integer(required=True, validate=check_room_id)
     user_id = fields.Integer(required=True, validate=check_user_id)
 

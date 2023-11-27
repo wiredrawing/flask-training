@@ -13,7 +13,7 @@ class MessageFormatter(MessageFormatterInterface):
         self.__message = message
 
     def to_dict(self):
-        if self.__message.user is not None and self.__message.room is not None:
+        if self.__message.user is not None and self.__message.room is not None and self.__message.message_likes is not None:
             return {
                 "id": self.__message.id,
                 "message": self.__message.message,
@@ -26,7 +26,9 @@ class MessageFormatter(MessageFormatterInterface):
                     "id": self.__message.user_id,
                     "username": self.__message.user.username,
                     "email": self.__message.user.email,
-                }
+                },
+                 # いいねされている件数を取得
+                "message_likes": len(self.__message.message_likes),
             }
         else:
             raise Exception("Messageモデルのuserまたはroomが存在しません")

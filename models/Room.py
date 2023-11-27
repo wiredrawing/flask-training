@@ -4,6 +4,7 @@ from sqlalchemy import Column, Integer, Text, Date, String, DateTime, func
 from sqlalchemy.orm import relationship, backref
 
 from lib.setting import session, base, engine
+from models.Participant import Participant
 
 
 class Room(base):

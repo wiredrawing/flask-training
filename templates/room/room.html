@@ -82,13 +82,13 @@
 <input type="hidden" id="room_id" name="room_id" value="{{room.id}}">
 <!-- user_id -->
 <input type="hidden" id="user_id" name="user_id" value="{{user.id}}">
-{% for message in messages %}
+{% for message in formatted_messages %}
 <div id="message-wrapper">
   <div class="message-block">
-    <p>ID: {{message.id}}</p>
-    <p>メッセージ: {{message.message}}</p>
-    <p>発言者: {{message.user.username}}</p>
-    <p>いいね数: {{ message.message_likes | length }}</p>
+    <p>ID: {{message["id"]}}</p>
+    <p>メッセージ: {{message["message"]}}</p>
+    <p>発言者: {{message["user"]["username"]}}</p>
+    <p>いいね数: {{ message["message_likes"] }}</p>
     <!-- 当該メッセージにいいねをする -->
     <form action="/message/{{message.id}}/like" method="post">
       <input type="hidden" class="user_id" name="user_id" value="{{user.id}}">

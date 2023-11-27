@@ -9,9 +9,10 @@ from lib.setting import session
 from models.Message import Message
 from models.Participant import Participant
 from models.Room import Room
+from repositories.MessageFormatter import MessageFormatter
 
 from routes.CreateParticipantForm import CreateParticipantForm
-from routes.CreateRoomForm import CreateRoomForm
+from routes.CreateRoomForm import CreateRoomForm, CreateNewRoomForm
 
 app = Blueprint('room', __name__, url_prefix='/room')
 
@@ -73,7 +74,6 @@ def index():
 
 @app.route("/<int:room_id>", methods=['GET'])
 def room(room_id):
-
     get_app_logger(__name__).info("{}: ルームにアクセスしました".format(datetime.now()))
 
     if current_user.is_authenticated is not True:
@@ -95,15 +95,26 @@ def room(room_id):
     print("current_user.id ===> {}".format(current_user.id))
 
     room = session.query(Room).filter(Room.id == room_id).first()
+
+    # メッセージの作成APIの返却フォーマットと同じ仕様にする
+    formatted_messages = []
     for message in room.messages:
         print(message.message)
         print(type(message.message_likes))
         print(len(message.message_likes))
+        temp_message = MessageFormatter(message).to_dict()
+        formatted_messages.append(temp_message)
+        print(temp_message)
 
     get_app_logger(__name__).info("{}: ルームにアクセスが完了しました".format(datetime.now()))
     # print(dir(room))
     """指定されたチャットルームに紐づくメッセージを表示"""
-    return render_template("room/room.html", room=room, user=current_user, messages=room.messages)
+    return render_template(
+        "room/room.html",
+        room=room,
+        user=current_user,
+        formatted_messages=formatted_messages,
+        messages=room.messages)
 
 
 @app.route("/<int:room_id>/message/create/", methods=['POST'])
@@ -148,23 +159,47 @@ def room_form():
     :return:
     """
     form = CreateRoomForm(request.form)
-    return render_template("room/add_room.html", form=form)
+    print("GETリクエストでもformの値が取得できるかどうか", request.form.get("room_name", "あいうえおこれはデフォルト値"))
+    return render_template("room/add_room.html", form=request.form)
 
 
 @app.route("/add/", methods=['POST'])
-def add_post():
-    request_data = request.form
-    form = CreateRoomForm(request.form);
+def add_new_room():
+    posted_data = {
+        "room_name": request.form.get("room_name"),
+        "description": request.form.get("description"),
+    }
+    try :
+        schema = CreateNewRoomForm();
+        print(schema.dumps(posted_data));
+        error_messages = schema.validate(posted_data)
+        validated_data = schema.dump(posted_data)
+        print(request.form.to_dict())
+        print(request.form.get("room_name"))
+        print(error_messages)
+        if error_messages != {}:
+            """バリデーションエラーの場合はエラーを表示"""
+            return render_template(
+                "room/add_room.html",
+                error_messages=error_messages,
+                form=request.form)
 
-    if form.validate() is not True:
-        """バリデーションエラーの場合はエラーを表示"""
-        return render_template("room/add_room.html", form=form)
+        print(validated_data)
+    except Exception as e:
+        get_app_logger().error(e)
+        return "==="
+        return redirect("/room/add/")
 
-    if len(request_data["room_name"]) == 0 and len(request_data["description"]) == 0:
-        return "Room名および概要説明は必須項目です"
+    # request_data = request.form
+    # form = CreateRoomForm(request.form);
+    #
+    # if form.validate() is not True:
+
+    # if len(request_data["room_name"]) == 0 and len(request_data["description"]) == 0:
+    #     return "Room名および概要説明は必須項目です"
     try:
-        room_name = request_data["room_name"]
-        description = request_data["description"]
+        room_name = validated_data["room_name"]
+        description = validated_data["description"]
         # 同名のルームが存在する場合はエラー
         room_exists = session.query(Room).filter(Room.room_name == room_name).first()
         if room_exists is not None:
@@ -193,7 +228,7 @@ def join_room():
         form = CreateParticipantForm(request.form)
 
         if form.validate() is not True:
-            get_app_logger().error(form.errors)
+            get_app_logger(__name__).error(form.errors)
             # print(form.errors)
             # return ""
             return redirect("/room/")

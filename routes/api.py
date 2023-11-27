@@ -28,9 +28,10 @@ def create_message(room_id):
         """postデータを変数化"""
         scheme = CreateMessageForm()
         error_messages: dict = scheme.validate(request.json)
-
+        # error_messages: dict = scheme.validate({})
         # エラーメッセージが空っぽでない場合はエラーを返却する
         if error_messages != {}:
+            get_app_logger(__name__).error(error_messages)
             return jsonify(error_messages)
 
         # バリデーション成功時
