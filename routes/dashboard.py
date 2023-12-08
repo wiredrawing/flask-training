@@ -4,6 +4,7 @@ import bcrypt
 from flask import Flask, Blueprint, session as http_session, render_template, request, redirect
 from flask_login import current_user, logout_user
 from marshmallow import validate, fields, Schema
+from sqlalchemy import text
 
 from lib.setting import session, engine
 from models.Room import Room
@@ -96,60 +97,82 @@ def password():
 def password_update():
     try:
         post_data = request.form.to_dict()
-        print(post_data)
         users = session.query(User)
-        print(type(users))
         schema = CreateUpdatingPasswordForm()
-        # schema = Schema()
         """バリデーションルールを実行時に追加していく"""
-        print(dir(schema))
-        print(schema.fields)
-        # ユーザーID
-        if schema.fields["user_id"].validators == []:
-            schema.fields["user_id"].validators.append(
-                CheckUserExisting(session.query(User), error="ユーザーIDが一致しません")
-            )
+        # メタクラスによって付与された属性<fields>を都度空っぽにしていく
+        for field in list(schema.fields):
+            # 空にしないと前回のリクエスト分を保持してしまう
+            schema.fields[field].validators = []
             pass
+        # ユーザーID
+        if not schema.fields["user_id"].validators:
+            schema.fields["user_id"].validators.append(
+                CheckUserExisting(users, error="ユーザーIDが一致しません")
+            )
 
         # 現在のパスワード
-        # schema.fields["current_password"].validators = []
-        if schema.fields["current_password"].validators == []:
+        if not schema.fields["current_password"].validators:
             schema.fields["current_password"].validators.append(
-                CheckCurrentPassword(int(post_data["user_id"]), session.query(User), error="現在のパスワードが一致しません")
+                CheckCurrentPassword(int(post_data["user_id"]), users, error="現在のパスワードが一致しません")
             )
             pass
 
         # 新規パスワード
-        # schema.fields["new_password"].validators = []
-        if schema.fields["new_password"].validators == []:
+        if not schema.fields["new_password"].validators:
             schema.fields["new_password"].validators.append(
                 validate.Equal(post_data["new_password_confirm"], error="新しいパスワードと新しいパスワード(確認用)が一致しません(※実行時ルール追加)")
             )
             pass
 
         # 新規パスワード(確認用)
-        # schema.fields["new_password_confirm"].validators = []
-        if schema.fields["new_password_confirm"].validators == []:
+        if not schema.fields["new_password_confirm"].validators:
             schema.fields["new_password_confirm"].validators.append(
                 validate.Equal(post_data["new_password"], error="新しいパスワードと新しいパスワード(確認用)が一致しません(※実行時ルール追加)")
             )
             pass
 
+        # バリデーションエラーを検出
         result = schema.validate(post_data)
         if result != {}:
+            for key in list(result):
+                print(result[key])
             raise Exception(result);
-        # パスワードの更新処理を実行する
-        user = session.query(User).filter(User.id == post_data["user_id"]).first()
-        # blowfishでハッシュ化する
-        # saltの生成
-        salt = bcrypt.gensalt(rounds=12, prefix=b"2a")
-        hashed_password = bcrypt.hashpw(post_data["new_password"].encode("utf-8"), salt).decode("utf-8")
-        user.password = hashed_password
-        session.commit()
-        return redirect("/dashboard/password")
+
+        # 明示的なトランザクションの開始
+        try:
+            session.begin(True)
+            # パスワードの更新処理を実行する
+            user = session.query(User).filter(User.id == post_data["user_id"]).first()
+            # blowfishでハッシュ化する
+            # saltの生成
+            salt = bcrypt.gensalt(rounds=12, prefix=b"2a")
+            hashed_password = bcrypt.hashpw(post_data["new_password"].encode("utf-8"), salt).decode("utf-8")
+            user.password = hashed_password
+            session.commit()
+
+            # 生のSQLを発行する
+            sql = text('select connection_id() as connection_id ')
+            for row in session.execute(sql):
+                print("生SQLの実行結果")
+                print(row)
+                connection_id = row[0]
+                print(f"connection_id => {connection_id}")
+            return redirect("/dashboard/password/completed/{}")
+        except Exception as e:
+            print(e)
+            session.rollback();
     except Exception as e:
-        print(e)
+        print("例外発生-->")
+        print(e.args)
+        print(e.with_traceback)
         return e
+
+
+@app.route("/password/completed/<string:completed_hash>", methods=['GET'])
+def password_completed(completed_hash: str = ""):
+    print(completed_hash)
+    return render_template("dashboard/password_completed.html")
 
 
 # ログアウト処理を実行

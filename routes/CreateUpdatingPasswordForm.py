@@ -10,6 +10,7 @@ from routes.CreateRoomForm import check_word_length
 class CheckCurrentPassword(validate.Validator):
 
     def __init__(self, user_id: int, users: Query, error=None):
+        print(">>>>>>>>>>>>>>>>>>>>>>Call CheckCurrentPassword!!!!!!!!!!!")
         self.user_id = user_id
         self.users = users
         self.error = error
@@ -22,9 +23,13 @@ class CheckCurrentPassword(validate.Validator):
         # value => 現在のパスワード
         # blowfishでハッシュ化する
         # saltの生成
+        print(value)
+        print(user.email)
         print(user.password)
+
         is_match = bcrypt.checkpw(value.encode("utf-8"), user.password.encode("utf-8"))
-        if is_match is False:
+        print("is_match: ", is_match)
+        if not is_match:
             raise ValidationError(self.error)
         return value;
 
@@ -48,6 +53,6 @@ class CreateUpdatingPasswordForm(Schema):
 
     current_password = fields.String(required=True, error_messages={"required": "現在のパスワードは必須項目です"})
 
-    new_password = fields.String(required=True,  error_messages={"required": "新しいパスワードは必須項目です"})
+    new_password = fields.String(required=True, error_messages={"required": "新しいパスワードは必須項目です"})
 
     new_password_confirm = fields.String(required=True, error_messages={"required": "確認用パスワードは必須項目です"})
