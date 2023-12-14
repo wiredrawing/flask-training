@@ -8,7 +8,7 @@ from lib.setting import session, MAX_POOL_SIZE
 from models.Message import Message
 from models.MessageLike import MessageLike
 from repositories.MessageFormatter import MessageFormatter
-from routes.CreateMessageForm import CreateMessageForm
+from routes.CreateMessageForm import CreateMessageForm, check_ng_message, check_message_length
 from routes.CreateNewLikeForm import CreateNewLikeForm
 
 app = Blueprint('api', __name__, url_prefix='/api')
@@ -16,6 +16,7 @@ app = Blueprint('api', __name__, url_prefix='/api')
 
 @app.route("/message/<int:room_id>/create", methods=['POST'])
 def create_message(room_id):
+    get_app_logger(__name__).info(">>>>>>>>>>>メッセージの登録を開始します")
     """
     HTTPリクエスト経由でメッセージを登録する
     :param room_id:
@@ -26,8 +27,12 @@ def create_message(room_id):
         redis_cli: redis.Redis = execute_redis()
 
         """postデータを変数化"""
-        scheme = CreateMessageForm()
-        error_messages: dict = scheme.validate(request.json)
+        get_app_logger(__name__).info("test >>>>>>>>>>>メッセージの登録を開始します")
+        schema = CreateMessageForm()
+        # スキーマにバリデーターを追加する
+        schema.fields["message"].validators = [check_ng_message, check_message_length]
+        get_app_logger(__name__).info(request.json)
+        error_messages: dict = schema.validate(request.json)
         # error_messages: dict = scheme.validate({})
         # エラーメッセージが空っぽでない場合はエラーを返却する
         if error_messages != {}:
@@ -35,7 +40,7 @@ def create_message(room_id):
             return jsonify(error_messages)
 
         # バリデーション成功時
-        validated_data = scheme.load(request.json)
+        validated_data = schema.load(request.json)
 
         # 現在のコネクション数を取得する
         sql = """
@@ -51,8 +56,8 @@ def create_message(room_id):
         # 現在の既定値は15とする
         if current_connections_number > MAX_POOL_SIZE:
             raise Exception("現在のコネクション数が多すぎます。しばらく時間をおいてから再度お試しください。")
-        for row in all_connections:
-            print(row)
+        # for row in all_connections:
+        #     print(row)
 
         try:
             # session.begin(subtransactions=True)
@@ -68,6 +73,7 @@ def create_message(room_id):
             get_app_logger(__name__).error(e)
             raise Exception("メッセージの登録に失敗しました")
         latest_message_id = message.id
+        get_app_logger(__name__).info(">>>>>>>>>>>メッセージの登録が終了しました")
         print("********************", latest_message_id, "##########################")
 
         # message = session.query(Message).filter(Message.id == latest_message_id).first()

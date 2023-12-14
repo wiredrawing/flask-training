@@ -1,4 +1,6 @@
 from marshmallow import Schema, fields, pprint, ValidationError
+
+from lib.logger import get_app_logger
 from lib.setting import session
 from models.Room import Room
 from models.User import User
@@ -40,10 +42,23 @@ def check_message_length(message: str):
 
 
 class CreateMessageForm(Schema):
+
+    # 都度バリデーターを空っぽにする
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # 1957278415696
+        get_app_logger(__name__).info("__name__の値 {} CreateMessageFormのインスタンスid => {}".format(__name__, id(self)))
+        for key in list(self.fields):
+            for validator_rule in self.fields[key].validators:
+                get_app_logger(__name__).info("設定中のバリデータールール名{}に対して {}".format(key, str(validator_rule)))
+                get_app_logger(__name__).info("バリデータルールのid => {}".format(id(validator_rule)))
+            # self.fields内のバリデーションルールをすべて破棄する
+            self.fields[key].validators = []
+
     """
     メッセージの作成フォーム
     """
-    message = fields.String(required=True, validate=(check_ng_message,check_message_length), error_messages={"required": "メッセージは必須項目です"})
+    message = fields.String(required=True, validate=(check_ng_message, check_message_length), error_messages={"required": "メッセージは必須項目です"})
     room_id = fields.Integer(required=True, validate=check_room_id)
     user_id = fields.Integer(required=True, validate=check_user_id)
 

@@ -98,13 +98,14 @@ def room(room_id):
 
     # メッセージの作成APIの返却フォーマットと同じ仕様にする
     formatted_messages = []
+    count = 0
     for message in room.messages:
-        print(message.message)
-        print(type(message.message_likes))
-        print(len(message.message_likes))
+        # とりあえずリレーションから20件分を取得
+        if count > 20:
+            break
         temp_message = MessageFormatter(message).to_dict()
         formatted_messages.append(temp_message)
-        print(temp_message)
+        count += 1
 
     get_app_logger(__name__).info("{}: ルームにアクセスが完了しました".format(datetime.now()))
     # print(dir(room))

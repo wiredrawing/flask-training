@@ -17,7 +17,7 @@ def get_app_logger(logger_name: str):
             # ※注意)プログラム実行ディレクトリのlogs/app.logに出力
             r'./logs/{}.app.log.{}'.format(logger_name, today),
             mode="a",
-            maxBytes=500 * 1024 * 1024 * 1024,
+            maxBytes=1000 * 1024 * 1024 * 1024,
             backupCount=10,
             encoding="utf-8"
         )

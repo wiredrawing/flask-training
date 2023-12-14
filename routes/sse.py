@@ -16,8 +16,8 @@ app = Blueprint('server_sent_event', __name__, url_prefix='/sse')
 @app.route("/messages/<int:room_id>/", methods=['GET'])
 def messages_on_room(room_id):
     headers = request.headers
-    for header in headers:
-        print(header);
+    # for header in headers:
+    #     print(header);
     # server-sent-eventの最終更新IDを取得
     last_event_id = headers.get("Last-Event-ID")
     print("最後に受け取った<Last-Event-ID: {}>".format(last_event_id))
@@ -65,5 +65,5 @@ def _fetch_message(room_id, current_time, r):
             data = "\n".join(data_list)
             yield data
         else:
-            # get_app_logger(__name__).error("redis-serverからデータを取得できませんでした")
+            get_app_logger(__name__).error("redis-serverからデータを取得できませんでした")
             pass
