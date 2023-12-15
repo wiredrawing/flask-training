@@ -11,7 +11,7 @@ from lib.setting import session, engine
 from models.Room import Room
 from models.User import User
 from routes.CreateUpdateUserInfoForm import CreateUpdateUserInfoForm
-from routes.CreateUpdatingPasswordForm import CreateUpdatingPasswordForm, CheckUserExisting, CheckCurrentPassword
+from routes.CreateUpdatingPasswordForm import CheckUserExisting, CheckCurrentPassword, get_create_updating_password_schema
 
 app = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 
@@ -128,7 +128,6 @@ def update():
         raise Exception(e)
 
 
-
 # パスワードの更新
 @app.route("/password", methods=['GET'])
 def password():
@@ -148,10 +147,10 @@ def password_update():
     try:
         get_app_logger(__name__).info("password_update関数のスタート");
         post_data = request.form.to_dict()
-        users = session.query(User)
 
-        # スキーマを生成(おそらくこれはシングルトン)
-        schema = CreateUpdatingPasswordForm()
+        # スキーマのクラスオブジェクトを取得する
+        schema_class = get_create_updating_password_schema(post_data, login_user_id=current_user.id)
+        schema = schema_class()
         # schmea2 = CreateUpdatingPasswordForm()
 
         # members  = inspect.getmembers(CreateUpdatingPasswordForm)
@@ -165,24 +164,24 @@ def password_update():
         # get_app_logger(__name__).info("スキーの初期化 {}".format(schema.fields["current_password"].validators))
         """バリデーションルールを実行時に追加していく"""
         # ユーザーID
-        schema.fields["user_id"].validators.append(
-            CheckUserExisting(users, error="ユーザーIDが一致しません")
-        )
-
-        # 現在のパスワード
-        schema.fields["current_password"].validators.append(
-            CheckCurrentPassword(int(post_data["user_id"]), users, error="現在のパスワードが一致しません")
-        )
-
-        # 新規パスワード
-        schema.fields["new_password"].validators.append(
-            validate.Equal(post_data["new_password_confirm"], error="新しいパスワードと新しいパスワード(確認用)が一致しません(※実行時ルール追加)")
-        )
-
-        # 新規パスワード(確認用)
-        schema.fields["new_password_confirm"].validators.append(
-            validate.Equal(post_data["new_password"], error="新しいパスワードと新しいパスワード(確認用)が一致しません(※実行時ルール追加)")
-        )
+        # schema.fields["user_id"].validators.append(
+        #     CheckUserExisting(users, error="ユーザーIDが一致しません")
+        # )
+        #
+        # # 現在のパスワード
+        # schema.fields["current_password"].validators.append(
+        #     CheckCurrentPassword(int(post_data["user_id"]), users, error="現在のパスワードが一致しません")
+        # )
+        #
+        # # 新規パスワード
+        # schema.fields["new_password"].validators.append(
+        #     validate.Equal(post_data["new_password_confirm"], error="新しいパスワードと新しいパスワード(確認用)が一致しません(※実行時ルール追加)")
+        # )
+        #
+        # # 新規パスワード(確認用)
+        # schema.fields["new_password_confirm"].validators.append(
+        #     validate.Equal(post_data["new_password"], error="新しいパスワードと新しいパスワード(確認用)が一致しません(※実行時ルール追加)")
+        # )
 
         # バリデーションエラーを検出
         result = schema.validate(post_data)
@@ -222,6 +221,7 @@ def password_update():
             raise Exception(e)
     except Exception as e:
         get_app_logger(__name__).error(f"例外発生--> {e} テンプレートを返却します")
+        return ""
 
 
 @app.route("/password/completed/<string:completed_hash>", methods=['GET'])

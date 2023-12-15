@@ -2,6 +2,8 @@ import json
 from json import dumps
 import redis
 from flask import Flask, Blueprint, render_template, redirect, request, jsonify, make_response
+from flask_login import current_user
+
 from lib.logger import get_app_logger
 from lib.redis_cli import execute_redis
 from lib.setting import session, MAX_POOL_SIZE
@@ -9,7 +11,7 @@ from models.Message import Message
 from models.MessageLike import MessageLike
 from repositories.MessageFormatter import MessageFormatter
 from routes.CreateMessageForm import CreateMessageForm, check_ng_message, check_message_length
-from routes.CreateNewLikeForm import CreateNewLikeForm
+from routes.CreateNewLikeForm import get_create_new_like_schema
 
 app = Blueprint('api', __name__, url_prefix='/api')
 
@@ -111,7 +113,10 @@ def like(message_id):
     :param message_id:
     :return:
     """
-    schema = CreateNewLikeForm()
+    # 関数でラップしたスキーマクラスを返却する
+    schema_class = get_create_new_like_schema(current_user.id)
+    schema = schema_class()
+    # schema = CreateNewLikeForm()
     error_messages = schema.validate(request.json)
     if bool(error_messages) is True:
         # バリデーションエラーの場合はエラーを表示

@@ -33,7 +33,7 @@ app.register_blueprint(dashboard.app)
 app.register_blueprint(room.app)
 app.register_blueprint(sse.app)
 app.register_blueprint(api.app)
-app.register_blueprint(message_like.app)
+# app.register_blueprint(message_like.app)
 app.register_blueprint(admin)
 app.secret_key = "random seckey for flask"
 app.permanent_session_lifetime = timedelta(days=365)
