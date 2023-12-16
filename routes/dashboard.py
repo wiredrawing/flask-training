@@ -10,7 +10,7 @@ from lib.logger import get_app_logger
 from lib.setting import session, engine
 from models.Room import Room
 from models.User import User
-from routes.CreateUpdateUserInfoForm import CreateUpdateUserInfoForm
+from routes.CreateUpdateUserInfoForm import get_create_update_user_info_schema
 from routes.CreateUpdatingPasswordForm import CheckUserExisting, CheckCurrentPassword, get_create_updating_password_schema
 
 app = Blueprint('dashboard', __name__, url_prefix='/dashboard')
@@ -88,44 +88,40 @@ def edit():
 
 @app.route("/update", methods=['POST'])
 def update():
-    # 現在ログイン中ユーザー情報を取得
-    user_id = current_user.id
-    user = session.query(User).filter(User.id == user_id).first()
-    schema = CreateUpdateUserInfoForm()
-
-    # バリデータールールを追加する
-    # user_id
-    schema.fields["id"].validators.append(
-        CheckUserExisting(session.query(User), error="ユーザーIDが一致しません")
-    )
-    # email
-    schema.fields["email"].validators.append(
-        validate.Email(error="メールアドレスの形式が不正です")
-    )
-    # username
-    schema.fields["username"].validators.append(
-        validate.Length(min=4, max=64, error="ユーザー名は1文字以上20文字以下で入力してください")
-    )
-    # バリデーションエラーを検出
-    result = schema.validate(request.form.to_dict())
-    if result != {}:
-        raise Exception(result)
-
+    # ログイン中のユーザー情報を取得する
+    user = session.query(User).filter(User.id == current_user.id).first()
+    # バリデーションエラーの結果を格納する変数
+    errors = {}
     try:
-        session.begin(True)
-        post_data = request.form.to_dict()
-        user = session.query(User).filter(User.id == post_data["id"]).first()
-        if user is None:
-            raise Exception("ユーザーが存在しません")
-        user.email = post_data["email"]
-        user.username = post_data["username"]
-        session.commit()
-        # 編集画面へリダイレクト
-        return redirect("/dashboard/edit")
+        # 動的な値をバインドしたスキーマクラスを取得する
+        schema_class = get_create_update_user_info_schema(current_user.id, request.form.to_dict())
+        schema = schema_class()
+
+        # バリデーションエラーを検出
+        errors = schema.validate(request.form.to_dict())
+        if errors != {}:
+            print(errors)
+            return render_template("dashboard/edit.html", user=user, errors=errors)
+
+        try:
+            # 明示的なトランザクションの開始
+            session.begin(True)
+            post_data = request.form.to_dict()
+            user = session.query(User).filter(User.id == post_data["id"]).first()
+            if user is None:
+                raise Exception("ユーザーが存在しません")
+            user.email = post_data["email"]
+            user.username = post_data["username"]
+            session.commit()
+            # 編集画面へリダイレクト
+            return redirect("/dashboard/edit")
+        except Exception as e:
+            session.rollback()
+            get_app_logger(__name__).error(e)
+            return render_template("dashboard/edit.html", user=user, errors=e)
     except Exception as e:
-        session.rollback();
         get_app_logger(__name__).error(e)
-        raise Exception(e)
+        return render_template("dashboard/edit.html", user=user, errors=e)
 
 
 # パスワードの更新

@@ -4,9 +4,19 @@
 <form action="/dashboard/update" method="post">
   <input type="hidden" name="id" value="{{user.id}}">
   <p>メールアドレス</p>
+  {% if "email" in errors %}
+  {% for value in errors["email"] %}
+  <p class="error" style="color: red;">{{value}}</p>
+  {% endfor %}
+  {% endif %}
   <input type="text" name="email" value="{{user.email}}">
 
   <p>ユーザー名</p>
+  {% if "username" in errors %}
+  {% for value in errors["username"] %}
+  <p class="error" style="color: red;">{{value}}</p>
+  {% endfor %}
+  {% endif %}
   <input type="text" name="username" value="{{user.username}}">
 
   <input type="submit" value="更新">
