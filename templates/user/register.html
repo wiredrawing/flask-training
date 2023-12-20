@@ -7,6 +7,12 @@
   <p><input type="email" name="email" value="{{form.email.data}}" placeholder="メールアドレス"/></p>
   {{ render_field(form.username)}}
   <p><input type="text" name="username" value="{{form.username.data}}" placeholder="ユーザー名"/></p>
+  {{ render_field(form.zipcode)}}
+  <p><input type="text" name="zipcode" value="{{form.zipcode.data}}" placeholder="1234-567"></p>
+  {{ render_field(form.address)}}
+  <p><input type="text" name="address" value="{{form.address.data}}" placeholder="住所"></p>
+  {{ render_field(form.phone_number)}}
+  <p><input type="text" name="phone_number" value="{{form.phone_number.data}}" placeholder="000-0000-0000"></p>
   {{ render_field(form.password)}}
   <p><input type="text" name="password" placeholder="パスワード"/></p>
   {{ render_field(form.confirm)}}

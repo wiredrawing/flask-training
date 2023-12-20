@@ -7,6 +7,19 @@ from lib.setting import session
 from models.User import User
 
 
+def validate_phone_number(form, field):
+    # postされた電話番号
+    phone_number = field.data
+    # 電話番号の正規表現
+    # pythonでは正規表現の最初と最後に/をつけない
+    pattern = re.compile(r"^[0-9]{2,4}-[0-9]{2,4}-[0-9]{4}$")
+    matched = pattern.match(phone_number)
+    if matched is None:
+        # 指定した電話番号のフォーマットにマッチしない場合はエラー
+        raise ValidationError("電話番号のフォーマットが不正です")
+    return matched;
+
+
 def original_password(message):
     def rule(form, field):
         """パスワードは<記号>,<半角英字の大文字と小文字>,<数字>を含む必要がある"""
@@ -49,6 +62,17 @@ class CreateUserForm(Form):
         duplicate_email,
         # defaultキーワード引数で初期値を設定できる
     ], default="")
+    zipcode = StringField('Zipcode', [
+        validators.DataRequired(message="郵便番号は必須項目となります"),
+        validators.Length(min=8, max=8, message="郵便番号は7文字で入力して下さい"),
+    ], default="")
+    address = StringField("Aaddress", [
+        validators.DataRequired(message="住所は必須項目となります")
+    ], default="")
+    phone_number = StringField('Phone Number', [
+        validate_phone_number,
+        validators.DataRequired(message="電話番号は必須項目となります")
+    ], default="")
     password = PasswordField('New Password', [
         # 独自ルールの追加は,特定のフォーマットで関数を定義する
         original_password(message="指定のフォーマットで入力して下さい"),
@@ -62,4 +86,4 @@ class CreateUserForm(Form):
     ])
     gender = IntegerField("性別", [
         validators.DataRequired(message="性別は必須項目となります")
-    ], default="0")
+    ], default=0)

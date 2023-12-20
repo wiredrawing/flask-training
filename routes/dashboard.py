@@ -79,11 +79,11 @@ def dashboard():
 @app.route("/edit", methods=['GET'])
 def edit():
     """"現在ログインしているユーザーの情報を表示"""
-    if "user_id" in http_session:
-        user = session.query(User).filter(User.id == http_session["user_id"]).first()
-        return render_template("dashboard/edit.html", user=user)
-    else:
-        return "ログインしてください"
+    user_id = current_user.id
+    user = session.query(User).filter(User.id == user_id).first()
+    if user is None:
+        return redirect("/login")
+    return render_template("dashboard/edit.html", user=user)
 
 
 @app.route("/update", methods=['POST'])
@@ -114,7 +114,7 @@ def update():
             user.username = post_data["username"]
             session.commit()
             # 編集画面へリダイレクト
-            return redirect("/dashboard/edit")
+            return redirect("/dashboard/completed/")
         except Exception as e:
             session.rollback()
             get_app_logger(__name__).error(e)
@@ -123,6 +123,9 @@ def update():
         get_app_logger(__name__).error(e)
         return render_template("dashboard/edit.html", user=user, errors=e)
 
+@app.route("/completed/", methods=['GET'])
+def completed():
+    return render_template("dashboard/completed.html")
 
 # パスワードの更新
 @app.route("/password", methods=['GET'])

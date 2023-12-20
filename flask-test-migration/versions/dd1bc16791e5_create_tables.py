@@ -1,8 +1,8 @@
 """create tables
 
-Revision ID: a75c63717429
+Revision ID: dd1bc16791e5
 Revises: 
-Create Date: 2023-11-24 07:52:21.471819
+Create Date: 2023-12-21 08:15:30.161853
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'a75c63717429'
+revision: str = 'dd1bc16791e5'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -36,12 +36,17 @@ def upgrade() -> None:
     sa.Column('email', sa.String(length=256), nullable=False, comment='メールアドレス'),
     sa.Column('password', sa.Text(), nullable=False, comment='パスワード'),
     sa.Column('username', sa.Text(), nullable=False, comment='ユーザー名'),
+    sa.Column('zipcode', sa.String(length=8), nullable=True, comment='郵便番号'),
+    sa.Column('address', sa.Text(), nullable=True, comment='住所'),
+    sa.Column('phone_number', sa.String(length=16), nullable=True, comment='電話番号'),
     sa.Column('gender', sa.Integer(), nullable=False, comment='性別'),
+    sa.Column('token', sa.String(length=256), nullable=True, comment='何かしらのランダム性を持った文字列'),
     sa.Column('created_at', sa.DateTime(), nullable=False, comment='ユーザー登録日時'),
     sa.Column('updated_at', sa.DateTime(), nullable=True, comment='ユーザー更新日時'),
     sa.Column('deleted_at', sa.DateTime(), nullable=True, comment='ユーザー削除日時'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email'),
+    sa.UniqueConstraint('token'),
     comment='ユーザーモデル',
     mysql_collate='utf8_general_ci'
     )

@@ -20,24 +20,19 @@ def load_user(id):
 class User(UserMixin, base):
     """
     モデルのマイグレーション方法
-    (1).
+    -> alembic revision --autogenerate -m "create tables" でマイグレーションファイルを作成する
     最新バージョンへのマイグレーション
-    alembic upgrade head
-    (2).
+    -> alembic upgrade head
     マイグレーションを1つ戻す
-    alembic downgrade -1
-    (3).
+    -> alembic downgrade -1
     マイグレーションを1つ進める
-    alembic upgrade +1
-    (4).
+    -> alembic upgrade +1
     マイグレーションを指定したバージョンまで戻す
-    alembic downgrade 123456789
-    (5).
+    -> alembic downgrade 123456789
     マイグレーションを指定したバージョンまで進める
-    alembic upgrade 123456789
-    (6).
+    -> alembic upgrade 123456789
     マイグレーションを最初まで戻す
-    alembic downgrade base
+    -> alembic downgrade base
     """
     __tablename__ = 'users'
     __table_args__ = {
@@ -50,8 +45,12 @@ class User(UserMixin, base):
     email = Column(String(256), nullable=False, comment="メールアドレス", unique=True)
     password = Column(Text(), nullable=False, comment="パスワード");
     username = Column(Text(), nullable=False, comment="ユーザー名")
+    zipcode = Column(String(8), nullable=True, comment="郵便番号")
+    address = Column(Text(), nullable=True, comment="住所")
+    phone_number = Column(String(16), nullable=True, comment="電話番号")
     gender = Column(Integer, nullable=False, comment="性別")
-
+    # 特定の処理に使うユニークなトークン
+    token = Column(String(256), nullable=True, comment="何かしらのランダム性を持った文字列", unique=True)
     created_at = Column(DateTime, default=func.now(), nullable=False, comment="ユーザー登録日時")
     updated_at = Column(DateTime, default=func.now(), nullable=True, comment="ユーザー更新日時")
     deleted_at = Column(DateTime, default=func.now(), nullable=True, comment="ユーザー削除日時")
